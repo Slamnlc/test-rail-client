@@ -1,8 +1,8 @@
 from typing import List
 
-from api_client.modules.case_field import CaseField
-from api_client.modules.category import Base
-from api_client.modules.classes import Status, CaseType, Template, ResultField, Priority
+from pytest_testrail_api_client.modules.case_field import CaseField
+from pytest_testrail_api_client.modules.category import Base
+from pytest_testrail_api_client.modules.classes import Status, CaseType, Template, ResultField, Priority
 
 
 class StatusesApi(Base):

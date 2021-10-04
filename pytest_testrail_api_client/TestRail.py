@@ -1,15 +1,15 @@
-from api_client.api.cases_api import CasesApi
-from api_client.api.congif_api import ConfigsApi
-from api_client.api.milestones_api import MilestonesApi
-from api_client.api.plans_api import PlansApi
-from api_client.api.project_api import ProjectApi
-from api_client.api.results_api import ResultsApi
-from api_client.api.sections_api import SectionsApi
-from api_client.api.small_api import TestsApi, StatusesApi, CaseTypesApi, TemplatesApi, CaseFieldsApi, ResultsFieldsApi, \
+from pytest_testrail_api_client.api.cases_api import CasesApi
+from pytest_testrail_api_client.api.congif_api import ConfigsApi
+from pytest_testrail_api_client.api.milestones_api import MilestonesApi
+from pytest_testrail_api_client.api.plans_api import PlansApi
+from pytest_testrail_api_client.api.project_api import ProjectApi
+from pytest_testrail_api_client.api.results_api import ResultsApi
+from pytest_testrail_api_client.api.sections_api import SectionsApi
+from pytest_testrail_api_client.api.small_api import TestsApi, StatusesApi, CaseTypesApi, TemplatesApi, CaseFieldsApi, ResultsFieldsApi, \
     PrioritiesApi
-from api_client.api.suites_api import SuitesApi
-from api_client.api.user_api import UsersApi
-from api_client.modules.session import Session
+from pytest_testrail_api_client.api.suites_api import SuitesApi
+from pytest_testrail_api_client.api.user_api import UsersApi
+from pytest_testrail_api_client.modules.session import Session
 
 
 class TestRail(Session):

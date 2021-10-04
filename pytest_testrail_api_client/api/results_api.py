@@ -1,9 +1,9 @@
 from datetime import datetime
 from typing import List
 
-from api_client.modules.category import Base
-from api_client.modules.result import Result
-from api_client.service import split_by_coma, get_dict_from_locals
+from pytest_testrail_api_client.modules.category import Base
+from pytest_testrail_api_client.modules.result import Result
+from pytest_testrail_api_client.service import split_by_coma, get_dict_from_locals
 
 
 class ResultsApi(Base):

@@ -1,7 +1,7 @@
 from typing import List
 
-from api_client.modules.category import Base
-from api_client.modules.classes import User
+from pytest_testrail_api_client.modules.category import Base
+from pytest_testrail_api_client.modules.classes import User
 
 
 class UsersApi(Base):

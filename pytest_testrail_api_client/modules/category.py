@@ -1,4 +1,4 @@
-from api_client.modules.session import Session
+from pytest_testrail_api_client.modules.session import Session
 
 
 class Base:

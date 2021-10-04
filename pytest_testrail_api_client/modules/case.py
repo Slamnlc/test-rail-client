@@ -1,4 +1,4 @@
-from api_client.service import get_date_from_timestamp
+from pytest_testrail_api_client.service import get_date_from_timestamp
 
 
 class Case:

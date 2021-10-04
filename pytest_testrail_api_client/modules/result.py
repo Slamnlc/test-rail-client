@@ -1,6 +1,6 @@
-from api_client.modules.category import Base
-from api_client.modules.session import Session
-from api_client.service import get_date_from_timestamp
+from pytest_testrail_api_client.modules.category import Base
+from pytest_testrail_api_client.modules.session import Session
+from pytest_testrail_api_client.service import get_date_from_timestamp
 
 
 class Result(Base):

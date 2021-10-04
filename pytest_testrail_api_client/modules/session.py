@@ -5,7 +5,7 @@ from itertools import chain
 
 import requests
 
-from api_client.service import Auth
+from pytest_testrail_api_client.service import Auth
 
 
 class Session:

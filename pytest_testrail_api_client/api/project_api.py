@@ -1,8 +1,8 @@
 from typing import List
 
-from api_client.modules.category import Base
-from api_client.modules.classes import Project
-from api_client.service import get_dict_from_locals
+from pytest_testrail_api_client.modules.category import Base
+from pytest_testrail_api_client.modules.classes import Project
+from pytest_testrail_api_client.service import get_dict_from_locals
 
 
 class ProjectApi(Base):
