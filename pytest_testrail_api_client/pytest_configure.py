@@ -11,3 +11,4 @@ def pytest_bdd_after_scenario(request, feature, scenario):
 
 def pytest_addoption(parser):
     group = parser.getgroup("pytest-rail")
+    group.addoption('-mys', store='store_true')
