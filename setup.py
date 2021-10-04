@@ -22,7 +22,7 @@ setup(
     ],
     entry_points={
         "test_rail_api": [
-            "test_rail_api = pytest-testrail-api-client.TestRail",
+            "test_rail_api = pytest_testrail_api_client.TestRail",
         ]
     },
 )
