@@ -23,6 +23,9 @@ setup(
     entry_points={
         "pytest11": [
             "pytest-testrail-api-client = pytest_testrail_api_client.configure",
+        ],
+        "testrail_api": [
+            "test_rail_client = pytest_testrail_api_client.test_rail"
         ]
     },
 )
