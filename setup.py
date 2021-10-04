@@ -19,9 +19,9 @@ setup(
     install_requires=[
         'requests'
     ],
-    entry_points={
-        "test_rail_api": [
-            "test_rail_api = api_client",
-        ]
-    },
+    # entry_points={
+    #     "test_rail_api": [
+    #         "test_rail_api = api_client",
+    #     ]
+    # },
 )
