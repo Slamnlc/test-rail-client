@@ -1,6 +1,7 @@
 import configparser
 import json
 import os
+from itertools import chain
 
 import requests
 
@@ -26,6 +27,7 @@ class Session:
         del host, username, token
         if self.__host[-1] == '/':
             self.__host = self.__host[:-1]
+        self.__host = f'{self.__host}/index.php?'
 
     def request(self, method: str, url: str, data: dict = None, params: dict = None,
                 return_type: str = False, **kwargs):
@@ -40,8 +42,30 @@ class Session:
                 return response.text
             elif return_type == 'content':
                 return response.content
+            elif return_type == 'status_code':
+                return response.status_code
             else:
-                return response.json()
+                return_dict = response.json()
+                if 'limit' in return_dict:
+                    size = return_dict['size']
+                    main_name = tuple(key for key in return_dict if key not in ('offset', 'limit', 'size', '_links'))[0]
+                    if size < 250:
+                        return return_dict[main_name]
+                    else:
+                        if params is None:
+                            params = dict()
+                        result, offset = [], 250
+                        result.append(return_dict[main_name])
+                        while True:
+                            params.update({'limit': 250, 'offset': offset})
+                            resp = self._session.request(method=method, url=f'{self.__host}{url}', data=data,
+                                                         params=params, **kwargs).json()
+                            result.append(resp[main_name])
+                            offset += 250
+                            if resp['size'] < 250:
+                                return list(chain.from_iterable(result))
+                else:
+                    return response.json()
         else:
             return f'Error: {response.status_code}: {response.reason} ({response.text})'
 
