@@ -22,7 +22,7 @@ setup(
     ],
     entry_points={
         "pytest11": [
-            "pytest-testrail-api-client = pytest_testrail_api_client.TestRail",
+            "pytest-testrail-api-client = pytest_testrail_api_client.configure",
         ]
     },
 )
