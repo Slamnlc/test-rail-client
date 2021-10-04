@@ -7,3 +7,7 @@ def pytest_configure():
 
 def pytest_bdd_after_scenario(request, feature, scenario):
     1 == 1
+
+
+def pytest_addoption(parser):
+    group = parser.getgroup("pytest-rail")
