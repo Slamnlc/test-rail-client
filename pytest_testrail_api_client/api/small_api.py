@@ -32,7 +32,7 @@ class TestsApi(Base):
         """
         return self._valid(self._session.request('get', f'{self.__sub_host}/get_test/{test_id}'), TestObj)
 
-    def get_tests(self, run_id: int, status_id: (str, list)) -> List[TestObj]:
+    def get_tests(self, run_id: int, status_id: (str, list) = None) -> List[TestObj]:
         """
         https://www.gurock.com/testrail/docs/api/reference/tests#gettests
 

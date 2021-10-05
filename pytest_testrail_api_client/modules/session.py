@@ -8,7 +8,6 @@ import requests
 
 
 class Session:
-    result_cache = os.path.join(os.path.dirname(__file__), 'results.json')
 
     def __init__(self, host: str = None, username: str = None, token: str = None, env_policy: str = 'clear'):
         """
@@ -103,6 +102,11 @@ class Session:
                 return
         self.__host = '/'
         self._session.auth = Auth('', '')
+
+    @staticmethod
+    def get_results_file(session):
+        result_cache = os.path.join(os.path.dirname(__file__), 'results', 'results_{}.json')
+        return result_cache
 
 
 class Auth:
