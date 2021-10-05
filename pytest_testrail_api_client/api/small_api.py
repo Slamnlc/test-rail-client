@@ -2,7 +2,7 @@ from typing import List
 
 from pytest_testrail_api_client.modules.case_field import CaseField
 from pytest_testrail_api_client.modules.category import Base
-from pytest_testrail_api_client.modules.classes import Status, CaseType, Template, ResultField, Priority
+from pytest_testrail_api_client.modules.classes import Status, CaseType, Template, ResultField, Priority, TestObj
 
 
 class StatusesApi(Base):
@@ -21,7 +21,7 @@ class StatusesApi(Base):
 class TestsApi(Base):
     __sub_host = '/api/v2'
 
-    def get_test(self, test_id: int):
+    def get_test(self, test_id: int) -> TestObj:
         """
         https://www.gurock.com/testrail/docs/api/reference/tests#gettest
 
@@ -29,9 +29,9 @@ class TestsApi(Base):
         :param test_id:
         :return:
         """
-        return self._session.request('get', f'{self.__sub_host}/get_test/{test_id}')
+        return self._valid(self._session.request('get', f'{self.__sub_host}/get_test/{test_id}'), TestObj)
 
-    def get_tests(self, run_id: int):
+    def get_tests(self, run_id: int) -> List[TestObj]:
         """
         https://www.gurock.com/testrail/docs/api/reference/tests#gettests
 
@@ -39,7 +39,7 @@ class TestsApi(Base):
         :param run_id: The ID of the test run
         :return:
         """
-        return self._session.request('get', f'{self.__sub_host}/get_tests/{run_id}')
+        return self._valid(self._session.request('get', f'{self.__sub_host}/get_tests/{run_id}'), TestObj)
 
 
 class CaseTypesApi(Base):

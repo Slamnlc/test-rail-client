@@ -11,6 +11,7 @@ Done:
 10. Priorities
 11. Sections
 12. Milestones
+13. Runs
 
 Finish:
 - Cases
@@ -20,6 +21,5 @@ TODO:
 1. Attachments 
 2. Plans 
 3. Reports 
-4. Results 
-5. Runs 
-6. Shared Steps
+4. Results  
+5. Shared Steps

@@ -3,6 +3,7 @@ import os
 
 import pytest
 from pytest_bdd.parser import Feature, Scenario
+
 from pytest_testrail_api_client.modules.session import Session
 from pytest_testrail_api_client.test_rail import TestRail
 
@@ -27,7 +28,7 @@ def pytest_bdd_before_scenario(request, feature: Feature, scenario: Scenario):
         }
         steps.append(data)
     main_result = {
-        'sub_folder': sub_folder,
+        # 'sub_folder': sub_folder,
         'name': main_name,
         'status_id': get_status_number(scenario.failed),
         'custom_step_results': steps
@@ -36,14 +37,22 @@ def pytest_bdd_before_scenario(request, feature: Feature, scenario: Scenario):
 
 
 def pytest_sessionfinish(session):
-    results = json.loads(open(Session.result_cache, 'r').read())
+    with open(Session.result_cache, 'r') as file:
+        suites = json.loads(file.read())
     tr: TestRail = pytest.test_rail
-    suites = tr.suites.get_suites()
     configuration = 'REST, CHINA'
     plan_id = 653
+    config = sort_configurations(configuration)
     plan = tr.plans.get_plan(plan_id)
-    x = plan.get_run_from_entry_name_and_config('api', configuration)
-
+    results = []
+    for suite, results in suites.items():
+        run_to_add = plan.get_run_from_entry_name_and_config(suite, config)
+        if run_to_add is None:
+            add_run_to_plan(suite, config)
+        tests_list = tr.tests.get_tests(run_to_add.id)
+        for result in results:
+            result_test = [test.id for test in tests_list if test.name == result['name']]
+            1 == 1
     # tr_run = tr.
 
     1 == 1
@@ -54,6 +63,24 @@ def replace_examples(where: str, examples: list, variables: list):
         if len(variables) > index:
             where = where.replace(f'<{param}>', variables[index])
     return where
+
+
+def add_run_to_plan(suite_id, config):
+    pass
+
+
+def sort_configurations(configuration) -> str:
+    config_split, config = trim(configuration).split(', '), []
+    tr: TestRail = pytest.test_rail
+    for param in tr.configs.get_configs():
+        for suite in config_split:
+            if suite.lower() in [conf.name.lower() for conf in param.configs]:
+                config.append(suite)
+    return ', '.join(config)
+
+
+def trim(string: str) -> str:
+    return ' '.join(string.split())
 
 
 def get_status_number(status):

@@ -88,9 +88,9 @@ class Session:
                             options = config.options('pytest')
                             if all((option in options for option in
                                     ('testrail-email', 'testrail-key', 'testrail-url'))):
-                                sauce = config['saucelab']
-                                self._session.auth = Auth(sauce['testrail-email'], sauce['testrail-key'])
-                                self.__host = sauce['testrail-url']
+                                test_rail = config['pytest']
+                                self._session.auth = Auth(test_rail['testrail-email'], test_rail['testrail-key'])
+                                self.__host = test_rail['testrail-url']
                                 return
                 path = os.path.dirname(path)
 
