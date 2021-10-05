@@ -1,6 +1,9 @@
 import base64
 from datetime import datetime
 
+from _pytest.config import Config
+from _pytest.main import Session
+
 
 class Auth:
     def __init__(self, username, password):
@@ -36,3 +39,16 @@ def split_by_coma(*args):
 
 def get_date_from_timestamp(date):
     return None if date is None else datetime.fromtimestamp(date)
+
+
+def is_main_loop(session: (Session, Config)):
+    if isinstance(session, Session):
+        if not hasattr(session.config, 'workerinput'):
+            return True
+        else:
+            return session.config.option.dist != "no"
+    else:
+        if not hasattr(session, 'workerinput'):
+            return True
+        else:
+            return session.option.dist != "no"

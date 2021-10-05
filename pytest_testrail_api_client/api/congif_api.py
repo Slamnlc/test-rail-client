@@ -1,7 +1,7 @@
 from typing import List
 
 from pytest_testrail_api_client.modules.category import Base
-from pytest_testrail_api_client.modules.config import Config
+from pytest_testrail_api_client.modules.config_obj import Config
 
 
 class ConfigsApi(Base):
