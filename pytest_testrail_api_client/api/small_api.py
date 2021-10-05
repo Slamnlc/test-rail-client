@@ -3,6 +3,7 @@ from typing import List
 from pytest_testrail_api_client.modules.case_field import CaseField
 from pytest_testrail_api_client.modules.category import Base
 from pytest_testrail_api_client.modules.classes import Status, CaseType, Template, ResultField, Priority, TestObj
+from pytest_testrail_api_client.service import split_by_coma
 
 
 class StatusesApi(Base):
@@ -31,15 +32,18 @@ class TestsApi(Base):
         """
         return self._valid(self._session.request('get', f'{self.__sub_host}/get_test/{test_id}'), TestObj)
 
-    def get_tests(self, run_id: int) -> List[TestObj]:
+    def get_tests(self, run_id: int, status_id: (str, list)) -> List[TestObj]:
         """
         https://www.gurock.com/testrail/docs/api/reference/tests#gettests
 
         Returns a list of tests for a test run
         :param run_id: The ID of the test run
+        :param status_id: A comma-separated list of status IDs to filter by
         :return:
         """
-        return self._valid(self._session.request('get', f'{self.__sub_host}/get_tests/{run_id}'), TestObj)
+        status_id = split_by_coma(status_id)
+        data = dict() if status_id is None else {'status_id': status_id}
+        return self._valid(self._session.request('get', f'{self.__sub_host}/get_tests/{run_id}', data=data), TestObj)
 
 
 class CaseTypesApi(Base):

@@ -5,6 +5,7 @@ import pytest
 from _pytest.config import Config
 
 import pytest_testrail_api_client.test_rail as test_rail
+from pytest_testrail_api_client.modules.classes import Suite
 from pytest_testrail_api_client.modules.exceptions import TestRailError
 from pytest_testrail_api_client.modules.plan import Run
 from pytest_testrail_api_client.modules.session import Session
@@ -42,6 +43,7 @@ def pytest_bdd_after_scenario(request, feature, scenario):
 
 def pytest_sessionfinish(session):
     if is_main_loop(session):
+        print('Start publishing results')
         with open(Session.result_cache, 'r') as file:
             suites = json.loads(file.read())
         tr: test_rail.TestRail = pytest.test_rail
@@ -54,8 +56,7 @@ def pytest_sessionfinish(session):
         for suite, results_list in suites.items():
             run_to_add = plan.get_run_from_entry_name_and_config(suite, config)
             suite_id = tr.service.get_suite_by_name(suite, suites_list)
-            if len(suite_id) > 0:
-                suite_id = suite_id[0]
+            if isinstance(suite_id, Suite):
                 if run_to_add is None:
                     run_to_add = add_entry_to_plan(plan_id, suite_id, suite, config)
                 tests_list = tr.tests.get_tests(run_to_add.id)
@@ -77,9 +78,11 @@ def pytest_sessionfinish(session):
                     case_ids = [test.id for test in tests_list] + need_add
                     tr.plans.update_run_in_plan_entry(run_to_add.id, case_ids=case_ids)
                 tr.results.add_results(run_id=run_to_add.id, results=results)
+                tr.service.delete_untested_tests_from_run(run_to_add.id)
 
         if len(error_message) > 0:
             print('\n'.join(error_message))
+        print('Results published')
 
 
 def add_entry_to_plan(plan_id: int, suite_id: int, name: str, config: list) -> Run:

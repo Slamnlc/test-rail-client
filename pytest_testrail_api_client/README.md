@@ -12,14 +12,14 @@ Done:
 11. Sections
 12. Milestones
 13. Runs
+14. Plans
 
 Finish:
 - Cases
 - Case Fields
 
 TODO:
-1. Attachments 
-2. Plans 
-3. Reports 
-4. Results  
-5. Shared Steps
+1. Attachments  
+2. Reports 
+3. Results  
+4. Shared Steps

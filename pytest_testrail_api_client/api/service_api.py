@@ -22,3 +22,7 @@ class ServiceApi(Base):
         suite_list = self._session.suites.get_suites() if suite_list is None else suite_list
         result = tuple(suite for suite in suite_list if suite.name.lower() == suite_name.lower())
         return result[0] if len(result) > 0 else []
+
+    def delete_untested_tests_from_run(self, run_id: int):
+        case_ids = list(result['case_id'] for result in self._session.tests.get_tests(run_id, status_id='1, 5'))
+        self._session.plans.update_plan_entry(run_id=run_id, include_all=False, case_ids=case_ids)
