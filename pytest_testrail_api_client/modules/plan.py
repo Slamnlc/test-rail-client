@@ -1,6 +1,22 @@
+from itertools import chain
 from typing import List
 
 from pytest_testrail_api_client.service import get_date_from_timestamp
+
+
+class Entries:
+    def __init__(self, data: dict):
+        if data is not None:
+            self.id: str = data.get('id')
+            self.suite_id: int = data.get('suite_id')
+            self.name: str = data.get('name')
+            self.refs: str = data.get('refs')
+            self.description = data.get('description')
+            self.include_all: bool = data.get('include_all')
+            self.runs: List[Run] = [Run(run) for run in data.get('runs')]
+
+    def __str__(self):
+        return self.name
 
 
 class Plan:
@@ -35,20 +51,13 @@ class Plan:
     def __str__(self):
         return self.name
 
-
-class Entries:
-    def __init__(self, data: dict):
-        if data is not None:
-            self.id: str = data.get('id')
-            self.suite_id: int = data.get('suite_id')
-            self.name: str = data.get('name')
-            self.refs: str = data.get('refs')
-            self.description = data.get('description')
-            self.include_all: bool = data.get('include_all')
-            self.runs: List[Run] = [Run(run) for run in data.get('runs')]
-
-    def __str__(self):
-        return self.name
+    def get_run_from_entry_name_and_config(self, name: str, config: str) -> List[Entries]:
+        entries = tuple(entry.runs for entry in self.entries if entry.name.lower() == name.lower())
+        if len(entries) > 0:
+            result = [run for run in tuple(chain.from_iterable(entries)) if run.config.lower() == config.lower()]
+            return result[0] if len(result) > 0 else []
+        else:
+            return []
 
 
 class Run:

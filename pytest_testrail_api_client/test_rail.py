@@ -4,8 +4,10 @@ from pytest_testrail_api_client.api.milestones_api import MilestonesApi
 from pytest_testrail_api_client.api.plans_api import PlansApi
 from pytest_testrail_api_client.api.project_api import ProjectApi
 from pytest_testrail_api_client.api.results_api import ResultsApi
+from pytest_testrail_api_client.api.runs_api import RunsApi
 from pytest_testrail_api_client.api.sections_api import SectionsApi
-from pytest_testrail_api_client.api.small_api import TestsApi, StatusesApi, CaseTypesApi, TemplatesApi, CaseFieldsApi, ResultsFieldsApi, \
+from pytest_testrail_api_client.api.small_api import TestsApi, StatusesApi, CaseTypesApi, TemplatesApi, CaseFieldsApi, \
+    ResultsFieldsApi, \
     PrioritiesApi
 from pytest_testrail_api_client.api.suites_api import SuitesApi
 from pytest_testrail_api_client.api.user_api import UsersApi
@@ -77,3 +79,7 @@ class TestRail(Session):
     @property
     def results(self):
         return ResultsApi(self)
+
+    @property
+    def runs(self):
+        return RunsApi(self)

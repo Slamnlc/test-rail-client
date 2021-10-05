@@ -9,6 +9,8 @@ from pytest_testrail_api_client.service import Auth
 
 
 class Session:
+    result_cache = os.path.join(os.path.dirname(__file__), 'results.json')
+
     def __init__(self, host: str = None, username: str = None, token: str = None, env_policy: str = 'clear'):
         """
         https://docs.saucelabs.com/dev/api/
