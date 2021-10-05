@@ -3,7 +3,7 @@ from typing import List
 
 from pytest_testrail_api_client.modules.category import Base
 from pytest_testrail_api_client.modules.result import Result
-from pytest_testrail_api_client.service import split_by_coma, get_dict_from_locals, validate_status_id
+from pytest_testrail_api_client.service import split_by_coma, get_dict_from_locals, validate_id
 
 
 class ResultsApi(Base):
@@ -32,7 +32,7 @@ class ResultsApi(Base):
         :param status_id: A comma-separated list of status IDs to filter by
         :return:
         """
-        status_id = validate_status_id(status_id)
+        status_id = validate_id(status_id)
         params = get_dict_from_locals(locals(), exclude=['run_id', 'case_id'])
         return self._valid(self._session.request('get', f'{self.__sub_host}/get_results_for_case/{run_id}/{case_id}',
                                                  params=params), Result, add_session=True)
@@ -57,7 +57,7 @@ class ResultsApi(Base):
         if created_before is not None:
             created_before = int(created_before.timestamp())
         created_by = split_by_coma(created_by)
-        status_id = validate_status_id(status_id)
+        status_id = validate_id(status_id)
         params = get_dict_from_locals(locals(), exclude=['run_id'])
         return self._valid(self._session.request('get', f'{self.__sub_host}/get_results_for_run/{run_id}',
                                                  params=params), Result, add_session=True)

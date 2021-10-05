@@ -48,7 +48,7 @@ def pytest_sessionfinish(session):
         for result_file in Session.get_results_files():
             with open(result_file, 'r') as file:
                 suites = json.loads(file.read())
-            os.remove(file)
+            os.remove(result_file)
             tr: test_rail.TestRail = pytest.test_rail
             configuration = 'REST, CHINA'
             plan_id = 653

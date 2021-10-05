@@ -22,10 +22,10 @@ def split_by_coma(*args):
     elif len(args) > 1:
         return [sub_split(val) for val in args]
     else:
-        return args[0].replace(' ', '').split(',') if isinstance(args[0], (tuple, list)) else args[0]
+        return args[0].replace(' ', '').split(',') if not isinstance(args[0], (tuple, list)) else args[0]
 
 
-def validate_status_id(status_id):
+def validate_id(status_id):
     if status_id is not None:
         if isinstance(status_id, (list, tuple)):
             return ','.join(status_id)
