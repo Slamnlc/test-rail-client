@@ -42,5 +42,9 @@ def is_main_loop(session: (Session, Config)):
             return session.option.dist != "no"
 
 
+def get_worker_id(config):
+    return config.workerinput['workerid'] if hasattr(config, 'workerinput') else 'main'
+
+
 def trim(string: str) -> str:
     return ' '.join(string.split())

@@ -14,9 +14,9 @@ from pytest_testrail_api_client.service import is_main_loop, trim
 
 def pytest_configure(config: Config):
     pytest.test_rail = test_rail.TestRail()
-    if is_main_loop(config):
-        if os.path.isfile(Session.result_cache):
-            os.remove(Session.result_cache)
+    file_name = Session.get_results_file(config)
+    if os.path.isfile(file_name):
+        os.remove(file_name)
 
 
 def pytest_bdd_after_scenario(request, feature, scenario):
@@ -38,13 +38,13 @@ def pytest_bdd_after_scenario(request, feature, scenario):
         'status_id': get_status_number(scenario.failed),
         'custom_step_results': steps
     }
-    write_to_file(main_result, suite_name)
+    write_to_file(request, main_result, suite_name)
 
 
 def pytest_sessionfinish(session):
     if is_main_loop(session):
         print('Start publishing results')
-        with open(Session.result_cache, 'r') as file:
+        with open(Session.get_results_file(session), 'r') as file:
             suites = json.loads(file.read())
         tr: test_rail.TestRail = pytest.test_rail
         configuration = 'REST, CHINA'
@@ -125,8 +125,8 @@ def get_status_number(status):
     return {True: 5, False: 1, None: 2}.get(status, 3)
 
 
-def write_to_file(result: dict, suite_name: str):
-    file_path = Session.result_cache
+def write_to_file(request, result: dict, suite_name: str):
+    file_path = Session.get_results_file(request)
     if not os.path.isfile(file_path):
         with open(file_path, 'w') as file:
             file.write(json.dumps({suite_name: [result]}))

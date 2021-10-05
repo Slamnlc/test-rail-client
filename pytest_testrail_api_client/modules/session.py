@@ -6,6 +6,8 @@ from itertools import chain
 
 import requests
 
+from pytest_testrail_api_client.service import get_worker_id
+
 
 class Session:
 
@@ -105,8 +107,7 @@ class Session:
 
     @staticmethod
     def get_results_file(session):
-        result_cache = os.path.join(os.path.dirname(__file__), 'results', 'results_{}.json')
-        return result_cache
+        return os.path.join(os.path.dirname(__file__), 'results', f'results_{get_worker_id(session)}.json')
 
 
 class Auth:
