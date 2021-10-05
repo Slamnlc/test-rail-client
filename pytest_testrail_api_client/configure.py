@@ -62,24 +62,15 @@ def pytest_sessionfinish(session):
                 if isinstance(suite_id, Suite):
                     if run_to_add is None:
                         run_to_add = add_entry_to_plan(plan_id, suite_id, suite, config)
+                    tr.plans.update_run_in_plan_entry(run_to_add.id, include_all=True)
                     tests_list = tr.tests.get_tests(run_to_add.id)
-                    tests_in_suite, need_add = tr.cases.get_cases(suite_id=suite_id), []
                     for result in results_list:
                         result_test = [test.id for test in tests_list if test.title == result['name']]
                         if len(result_test) == 0:
-                            test_in_suite = [test.id for test in tests_in_suite if test.title == result['name']]
-                            if len(test_in_suite) > 0:
-                                result.update({'test_id': test_in_suite[0]})
-                                results.append(result)
-                                need_add.append(test_in_suite[0])
-                            else:
-                                error_message.append(f'Can\'t find scenario {result["name"]}')
+                            error_message.append(f'Can\'t find scenario {result["name"]}')
                         else:
                             result.update({'test_id': result_test[0]})
                             results.append(result)
-                    if len(need_add) > 0:
-                        case_ids = [test.id for test in tests_list] + need_add
-                        tr.plans.update_run_in_plan_entry(run_to_add.id, case_ids=case_ids)
                     tr.results.add_results(run_id=run_to_add.id, results=results)
                     tr.service.delete_untested_tests_from_run(run_to_add.id)
         if len(error_message) > 0:
