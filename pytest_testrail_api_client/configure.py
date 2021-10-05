@@ -3,7 +3,6 @@ import os
 
 import pytest
 from pytest_bdd.parser import Feature, Scenario
-
 from pytest_testrail_api_client.modules.session import Session
 from pytest_testrail_api_client.test_rail import TestRail
 
@@ -44,14 +43,25 @@ def pytest_sessionfinish(session):
     plan_id = 653
     config = sort_configurations(configuration)
     plan = tr.plans.get_plan(plan_id)
+    suites_list = tr.suites.get_suites()
     results = []
-    for suite, results in suites.items():
+    for suite, results_list in suites.items():
         run_to_add = plan.get_run_from_entry_name_and_config(suite, config)
-        if run_to_add is None:
-            add_run_to_plan(suite, config)
-        tests_list = tr.tests.get_tests(run_to_add.id)
-        for result in results:
-            result_test = [test.id for test in tests_list if test.name == result['name']]
+        suite_id = [project_suite.id for project_suite in suites_list if project_suite.name.lower() == suite.lower()]
+        if len(suite_id) > 0:
+            suite_id = suite_id[0]
+            if run_to_add is None:
+                add_run_to_plan(suite, config)
+            tests_list = tr.tests.get_tests(run_to_add.id)
+            tests_in_suite = tr.cases.get_cases(suite_id=suite_id)
+            for result in results_list:
+                result_test = [test.id for test in tests_list if test.title == result['name']]
+                if len(result_test) == 0:
+                    pass
+                else:
+                    result.update({'test_id': result_test[0]})
+                    results.append(result)
+            x = tr.results.add_results(run_id=run_to_add.id, results=results)
             1 == 1
     # tr_run = tr.
 

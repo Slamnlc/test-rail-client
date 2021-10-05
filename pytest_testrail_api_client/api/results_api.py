@@ -35,7 +35,7 @@ class ResultsApi(Base):
         status_id = split_by_coma(status_id)
         params = get_dict_from_locals(locals(), exclude=['run_id', 'case_id'])
         return self._valid(self._session.request('get', f'{self.__sub_host}/get_results_for_case/{run_id}/{case_id}',
-                                                 params=params), Result)
+                                                 params=params), Result, add_session=True)
 
     def get_results_for_run(self, run_id: int, created_after: datetime = None, created_before: datetime = None,
                             created_by: (int, list) = None, defects_filter: str = None,
@@ -97,4 +97,5 @@ class ResultsApi(Base):
         :return: List[Result]
         """
         data = {'results': results}
-        return self._valid(self._session.request('post', f'{self.__sub_host}/add_results/{run_id}', data=data), Result)
+        return self._valid(self._session.request('post', f'{self.__sub_host}/add_results/{run_id}', data=data), Result,
+                           add_session=True)
