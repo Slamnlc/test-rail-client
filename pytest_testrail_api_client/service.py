@@ -25,6 +25,14 @@ def split_by_coma(*args):
         return args[0].replace(' ', '').split(',') if isinstance(args[0], (tuple, list)) else args[0]
 
 
+def validate_status_id(status_id):
+    if status_id is not None:
+        if isinstance(status_id, (list, tuple)):
+            return ','.join(status_id)
+        elif isinstance(status_id, str):
+            return status_id.replace(' ', '')
+
+
 def get_date_from_timestamp(date):
     return None if date is None else datetime.fromtimestamp(date)
 
@@ -43,6 +51,8 @@ def is_main_loop(session: (Session, Config)):
 
 
 def get_worker_id(config):
+    if hasattr(config, 'config'):
+        config = config.config
     return config.workerinput['workerid'] if hasattr(config, 'workerinput') else 'main'
 
 

@@ -3,7 +3,7 @@ from typing import List
 from pytest_testrail_api_client.modules.case_field import CaseField
 from pytest_testrail_api_client.modules.category import Base
 from pytest_testrail_api_client.modules.classes import Status, CaseType, Template, ResultField, Priority, TestObj
-from pytest_testrail_api_client.service import split_by_coma
+from pytest_testrail_api_client.service import validate_status_id
 
 
 class StatusesApi(Base):
@@ -41,9 +41,10 @@ class TestsApi(Base):
         :param status_id: A comma-separated list of status IDs to filter by
         :return:
         """
-        status_id = split_by_coma(status_id)
-        data = dict() if status_id is None else {'status_id': status_id}
-        return self._valid(self._session.request('get', f'{self.__sub_host}/get_tests/{run_id}', data=data), TestObj)
+        status_id = validate_status_id(status_id)
+        params = dict() if status_id is None else {'status_id': status_id}
+        return self._valid(self._session.request('get', f'{self.__sub_host}/get_tests/{run_id}', params=params),
+                           TestObj)
 
 
 class CaseTypesApi(Base):
