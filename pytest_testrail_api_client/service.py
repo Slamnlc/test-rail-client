@@ -19,8 +19,10 @@ def split_by_coma(*args):
 
     if all([arg is None for arg in args]):
         return None
-    else:
+    elif len(args) > 1:
         return [sub_split(val) for val in args]
+    else:
+        return args[0].replace(' ', '').split(',') if isinstance(args[0], (tuple, list)) else args[0]
 
 
 def get_date_from_timestamp(date):

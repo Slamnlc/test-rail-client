@@ -31,7 +31,7 @@ class PlansApi(Base):
         return self._valid(self._session.request('get', f'{self.__sub_host}/get_plans/{project_id}'), Plan)
 
     def add_plan(self, name: str, project_id: int = None, description: str = None, milestone_id: int = None,
-                 entries: List[str] = None) -> Entries:
+                 entries: List[str] = None) -> Plan:
         """
         https://www.gurock.com/testrail/docs/api/reference/plans#addplan
 
@@ -67,16 +67,93 @@ class PlansApi(Base):
         :param runs: An array of test runs with configurations, please see the example below for details
         :return:
         """
-        if case_ids is not None:
-            if isinstance(case_ids, str):
-                case_ids = case_ids.replace(' ', '').split(',')
+        case_ids = split_by_coma(case_ids)
         config_ids = split_by_coma(config_ids)
-        if config_ids is not None:
-            if isinstance(config_ids, str):
-                config_ids = config_ids.replace(' ', '').split(',')
         data = get_dict_from_locals(locals(), exclude=['plan_id'])
         return self._valid(self._session.request('post', f'{self.__sub_host}/add_plan_entry/{plan_id}', data=data),
                            Entries)
+
+    def add_run_to_plan_entry(self, plan_id: int, entry_id: str, config_ids: (list, str), description: str = None,
+                              assignedto_id: int = None, include_all: bool = None, case_ids: (list, str) = None,
+                              refs: str = None) -> Run:
+        """
+        https://www.gurock.com/testrail/docs/api/reference/plans#addruntoplanentry
+
+        Adds a new test run to a test plan entry (using configurations)
+        :param plan_id: The ID of the plan the test runs should be added to
+        :param entry_id: The ID of the test plan entry
+        :param config_ids: An array of configuration IDs used for the test run of the test plan entry (Required)
+        :param description: The description of the test run
+        :param assignedto_id: The ID of the user the test run should be assigned to
+        :param include_all: True for including all test cases of the test suite and false for a custom case selection
+        :param case_ids: An array of case IDs for the custom case selection (Required if include_all is false)
+        :param refs: A comma-separated list of references/requirements
+        :return:
+        """
+        case_ids = split_by_coma(case_ids)
+        config_ids = split_by_coma(config_ids)
+        data = get_dict_from_locals(locals(), exclude=['plan_id', 'entry_id'])
+        return self._valid(
+            self._session.request('post', f'{self.__sub_host}/add_run_to_plan_entry/{plan_id}/{entry_id}',
+                                  data=data), Entries)
+
+    def update_plan(self, plan_id: int, description: str = None, milestone_id: int = None,
+                    entries: List[str] = None) -> Plan:
+        """
+        https://www.gurock.com/testrail/docs/api/reference/plans#updateplan
+
+        Updates an existing test plan
+        (partial updates are supported, i.e. you can submit and update specific fields only).
+        :param plan_id: The ID of the test plan
+        :param description: The description of the test plan
+        :param milestone_id: The ID of the milestone to link to the test plan
+        :param entries: An array of objects describing the test runs of the plan
+        :return:
+        """
+        data = get_dict_from_locals(locals(), exclude=['plan_id'])
+        return self._valid(self._session.request('post', f'{self.__sub_host}/update_plan/{plan_id}', data=data), Plan)
+
+    def update_plan_entry(self, plan_id: int, entry_id: str, name: str = None, description: str = None,
+                          assignedto_id: int = None, include_all: bool = None, case_ids: (list, str) = None,
+                          refs: str = None) -> Entries:
+        """
+        https://www.gurock.com/testrail/docs/api/reference/plans#updateplanentry
+
+        Updates one or more groups of test runs in a plan
+        (partial updates are supported, i.e. you can submit and update specific fields only).
+        :param plan_id: The ID of the test plan
+        :param entry_id: The ID of the test plan entry (note: not the test run ID)
+        :param name: The name of the test run(s)
+        :param description: The description of the test run(s) (requires TestRail 5.2 or later)
+        :param assignedto_id: The ID of the user the test run(s) should be assigned to
+        :param include_all: True for including all test cases of the test suite and false for a custom case selection
+        :param case_ids: An array of case IDs for the custom case selection
+        :param refs: A string of external requirement IDs, separated by commas. (requires TestRail 6.3 or later)
+        :return:
+        """
+        case_ids = split_by_coma(case_ids)
+        data = get_dict_from_locals(locals(), exclude=['plan_id', 'entry_id'])
+        return self._valid(self._session.request('post', f'{self.__sub_host}/update_plan_entry/{plan_id}/{entry_id}',
+                                                 data=data), Entries)
+
+    def update_run_in_plan_entry(self, run_id: int, description: str = None, assignedto_id: int = None,
+                                 include_all: bool = None, case_ids: (list, str) = None, refs: str = None) -> Run:
+        """
+        https://www.gurock.com/testrail/docs/api/reference/plans#updateruninplanentry
+
+        Updates a run inside a plan entry which uses configurations
+        :param run_id: The ID of the test run
+        :param description: The description of the test run
+        :param assignedto_id: The ID of the user the test run should be assigned to
+        :param include_all: True for including all test cases of the test suite and false for a custom case selection
+        :param case_ids: An array of case IDs for the custom case selection. (Required if include_all is false)
+        :param refs: A comma-separated list of references/requirements
+        :return:
+        """
+        case_ids = split_by_coma(case_ids)
+        data = get_dict_from_locals(locals(), exclude=['run_id'])
+        return self._valid(self._session.request('post', f'{self.__sub_host}/update_run_in_plan_entry/{run_id}',
+                                                 data=data), Run)
 
     def close_plan(self, plan_id: int) -> Plan:
         """

@@ -1,7 +1,9 @@
 from itertools import chain
+from typing import List
 
 import pytest_testrail_api_client.configure as configure
 from pytest_testrail_api_client.modules.category import Base
+from pytest_testrail_api_client.modules.classes import Suite
 
 
 class ServiceApi(Base):
@@ -15,3 +17,8 @@ class ServiceApi(Base):
             if len(config_id) > 0:
                 config_ids.append(config_id[0])
         return config_ids
+
+    def get_suite_by_name(self, suite_name: str, suite_list: List[Suite] = None) -> Suite:
+        suite_list = self._session.suites.get_suites() if suite_list is None else suite_list
+        result = tuple(suite for suite in suite_list if suite.name.lower() == suite_name.lower())
+        return result[0] if len(result) > 0 else []

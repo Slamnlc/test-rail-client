@@ -5,6 +5,8 @@ import pytest
 from _pytest.config import Config
 
 import pytest_testrail_api_client.test_rail as test_rail
+from pytest_testrail_api_client.modules.exceptions import TestRailError
+from pytest_testrail_api_client.modules.plan import Run
 from pytest_testrail_api_client.modules.session import Session
 from pytest_testrail_api_client.service import is_main_loop, trim
 
@@ -48,33 +50,48 @@ def pytest_sessionfinish(session):
         config = sort_configurations(configuration)
         plan = tr.plans.get_plan(plan_id)
         suites_list = tr.suites.get_suites()
-        results = []
+        results, error_message = [], []
         for suite, results_list in suites.items():
             run_to_add = plan.get_run_from_entry_name_and_config(suite, config)
-            suite_id = [project_suite.id for project_suite in suites_list if
-                        project_suite.name.lower() == suite.lower()]
+            suite_id = tr.service.get_suite_by_name(suite, suites_list)
             if len(suite_id) > 0:
                 suite_id = suite_id[0]
                 if run_to_add is None:
-                    entry = tr.plans.add_plan_entry(plan_id, suite_id, name=suite,
-                                                    config_ids=tr.service.convert_configs_to_ids(config),
-                                                    include_all=True)
-                    1 == 1
+                    run_to_add = add_entry_to_plan(plan_id, suite_id, suite, config)
                 tests_list = tr.tests.get_tests(run_to_add.id)
-                tests_in_suite = tr.cases.get_cases(suite_id=suite_id)
+                tests_in_suite, need_add = tr.cases.get_cases(suite_id=suite_id), []
                 for result in results_list:
                     result_test = [test.id for test in tests_list if test.title == result['name']]
                     if len(result_test) == 0:
-
-                        pass
+                        test_in_suite = [test.id for test in tests_in_suite if test.title == result['name']]
+                        if len(test_in_suite) > 0:
+                            result.update({'test_id': test_in_suite[0]})
+                            results.append(result)
+                            need_add.append(test_in_suite[0])
+                        else:
+                            error_message.append(f'Can\'t find scenario {result["name"]}')
                     else:
                         result.update({'test_id': result_test[0]})
                         results.append(result)
+                if len(need_add) > 0:
+                    case_ids = [test.id for test in tests_list] + need_add
+                    tr.plans.update_run_in_plan_entry(run_to_add.id, case_ids=case_ids)
                 tr.results.add_results(run_id=run_to_add.id, results=results)
-            1 == 1
-    # tr_run = tr.
 
-    1 == 1
+        if len(error_message) > 0:
+            print('\n'.join(error_message))
+
+
+def add_entry_to_plan(plan_id: int, suite_id: int, name: str, config: list) -> Run:
+    tr: test_rail.TestRail = pytest.test_rail
+    config_ids = tr.service.convert_configs_to_ids(config)
+    runs = [{'include_all': True, 'config_ids': config_ids}]
+    entry = tr.plans.add_plan_entry(
+        plan_id, suite_id, name=name, config_ids=config_ids, include_all=True, runs=runs)
+    if not isinstance(entry, str):
+        return entry.runs[0]
+    else:
+        raise TestRailError(entry)
 
 
 def replace_examples(where: str, examples: list, variables: list):
