@@ -109,6 +109,12 @@ class Session:
     def get_results_file(session):
         return os.path.join(os.path.dirname(__file__), 'results', f'results_{get_worker_id(session)}.json')
 
+    @staticmethod
+    def get_results_files():
+        root_folder = os.path.join(os.path.dirname(__file__), 'results')
+        return tuple(os.path.join(root_folder, file) for file in os.listdir(root_folder)
+                     if file.split('.')[-1] == 'json')
+
 
 class Auth:
     def __init__(self, username, password):
