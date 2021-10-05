@@ -6,7 +6,7 @@ from _pytest.config import Config
 
 import pytest_testrail_api_client.test_rail as test_rail
 from pytest_testrail_api_client.modules.session import Session
-from pytest_testrail_api_client.service import is_main_loop
+from pytest_testrail_api_client.service import is_main_loop, trim
 
 
 def pytest_configure(config: Config):
@@ -58,8 +58,8 @@ def pytest_sessionfinish(session):
                 if run_to_add is None:
                     entry = tr.plans.add_plan_entry(plan_id, suite_id, name=suite,
                                                     config_ids=tr.service.convert_configs_to_ids(config),
-                                                    include_all=False)
-                    1==1
+                                                    include_all=True)
+                    1 == 1
                 tests_list = tr.tests.get_tests(run_to_add.id)
                 tests_in_suite = tr.cases.get_cases(suite_id=suite_id)
                 for result in results_list:
@@ -99,10 +99,6 @@ def sort_configurations(configuration) -> str:
             if suite.lower() in [conf.name.lower() for conf in param.configs]:
                 config.append(suite)
     return ', '.join(config)
-
-
-def trim(string: str) -> str:
-    return ' '.join(string.split())
 
 
 def get_status_number(status):

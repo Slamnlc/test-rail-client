@@ -1,11 +1,10 @@
+import base64
 import configparser
 import json
 import os
 from itertools import chain
 
 import requests
-
-from pytest_testrail_api_client.service import Auth
 
 
 class Session:
@@ -104,3 +103,16 @@ class Session:
                 return
         self.__host = '/'
         self._session.auth = Auth('', '')
+
+
+class Auth:
+    def __init__(self, username, password):
+        self.data = base64.b64encode(b':'.join((username.encode('ascii'),
+                                                password.encode('ascii')))).strip().decode('ascii')
+
+    def __call__(self, r):
+        r.headers['Authorization'] = f'Basic {self.data}'
+        return r
+
+    def __del__(self):
+        return 'BasicAuth'

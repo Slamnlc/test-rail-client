@@ -2,7 +2,7 @@ from typing import List
 
 from pytest_testrail_api_client.modules.category import Base
 from pytest_testrail_api_client.modules.plan import Plan, Run, Entries
-from pytest_testrail_api_client.service import get_dict_from_locals
+from pytest_testrail_api_client.service import get_dict_from_locals, split_by_coma
 
 
 class PlansApi(Base):
@@ -70,6 +70,7 @@ class PlansApi(Base):
         if case_ids is not None:
             if isinstance(case_ids, str):
                 case_ids = case_ids.replace(' ', '').split(',')
+        config_ids = split_by_coma(config_ids)
         if config_ids is not None:
             if isinstance(config_ids, str):
                 config_ids = config_ids.replace(' ', '').split(',')

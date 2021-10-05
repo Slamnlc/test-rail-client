@@ -1,21 +1,7 @@
-import base64
 from datetime import datetime
 
 from _pytest.config import Config
 from _pytest.main import Session
-
-
-class Auth:
-    def __init__(self, username, password):
-        self.data = base64.b64encode(b':'.join((username.encode('ascii'),
-                                                password.encode('ascii')))).strip().decode('ascii')
-
-    def __call__(self, r):
-        r.headers['Authorization'] = f'Basic {self.data}'
-        return r
-
-    def __del__(self):
-        return 'BasicAuth'
 
 
 def get_dict_from_locals(locals_dict: dict, replace_underscore: bool = False, exclude: list = None):
@@ -28,7 +14,7 @@ def split_by_coma(*args):
     def sub_split(value):
         if value is not None:
             if not isinstance(value, (tuple, list)):
-                value = value.replace(' ', '').split(',')
+                value = trim(value).split(', ')
             return value
 
     if all([arg is None for arg in args]):
@@ -52,3 +38,7 @@ def is_main_loop(session: (Session, Config)):
             return True
         else:
             return session.option.dist != "no"
+
+
+def trim(string: str) -> str:
+    return ' '.join(string.split())
