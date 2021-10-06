@@ -19,7 +19,6 @@ def pytest_configure(config: Config):
         os.remove(file_name)
 
 
-@pytest.hookimpl(tryfirst=True)
 def pytest_bdd_after_scenario(request, feature, scenario):
     if 'pytest_testrail_export_test_results' in request.config.option and \
             request.config.option.pytest_testrail_export_test_results is True:
