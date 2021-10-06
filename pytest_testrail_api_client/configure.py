@@ -85,6 +85,7 @@ def pytest_sessionfinish(session):
             if len(error_message) > 0:
                 print('\n'.join(error_message))
             print('Results published')
+        tr._session.close()
 
 
 def add_entry_to_plan(plan_id: int, suite_id: int, name: str, config: list) -> Run:
@@ -152,28 +153,28 @@ def pytest_addoption(parser):
         group.addoption(value, **data)
 
 
-def pytest_bdd_step_error(request, scenario, step, exception):
+def pytest_bdd_step_error(scenario, step, exception):
     _step_error(exception, scenario, step)
 
 
-def pytest_bdd_step_validation_error(request, scenario, step, exception):
+def pytest_bdd_step_validation_error(scenario, step, exception):
     _step_error(exception, scenario, step)
 
 
-def pytest_bdd_step_func_lookup_error(request, scenario, step, exception):
+def pytest_bdd_step_func_lookup_error(scenario, step, exception):
     _step_error(exception, scenario, step)
 
 
 def _step_error(exception, scenario, step):
     scenario.exception = exception
     scenario.failed = True
-    flag = False
+    is_blocked = False
     for scenario_step in scenario.steps:
-        scenario_step.failed = None if flag else False
+        scenario_step.failed = None if is_blocked else False
         if scenario_step == step:
             scenario_step.exception = exception
             scenario_step.failed = True
-            flag = True
+            is_blocked = True
     exception_message = exception.msg if hasattr(exception, 'msg') \
         else exception.message if hasattr(exception, 'message') \
         else exception.args[0] if hasattr(exception, 'args') and exception.args.__len__() > 0 \
