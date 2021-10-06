@@ -115,6 +115,9 @@ class Session:
         return tuple(os.path.join(root_folder, file) for file in os.listdir(root_folder)
                      if file.split('.')[-1] == 'json')
 
+    def __del__(self):
+        self._session.close()
+
 
 class Auth:
     def __init__(self, username, password):
