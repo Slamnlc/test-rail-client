@@ -150,3 +150,32 @@ def pytest_addoption(parser):
         if types[index] is not None:
             data['type'] = types[index]
         group.addoption(value, **data)
+
+
+def pytest_bdd_step_error(request, scenario, step, exception):
+    _step_error(exception, scenario, step)
+
+
+def pytest_bdd_step_validation_error(request, scenario, step, exception):
+    _step_error(exception, scenario, step)
+
+
+def pytest_bdd_step_func_lookup_error(request, scenario, step, exception):
+    _step_error(exception, scenario, step)
+
+
+def _step_error(exception, scenario, step):
+    scenario.exception = exception
+    scenario.failed = True
+    flag = False
+    for scenario_step in scenario.steps:
+        scenario_step.failed = None if flag else False
+        if scenario_step == step:
+            scenario_step.exception = exception
+            scenario_step.failed = True
+            flag = True
+    exception_message = exception.msg if hasattr(exception, 'msg') \
+        else exception.message if hasattr(exception, 'message') \
+        else exception.args[0] if hasattr(exception, 'args') and exception.args.__len__() > 0 \
+        else 'no error message'
+    scenario.exception_message = exception_message
