@@ -28,7 +28,7 @@ def split_by_coma(*args):
 def validate_id(status_id):
     if status_id is not None:
         if isinstance(status_id, (list, tuple)):
-            return ','.join(status_id)
+            return status_id
         elif isinstance(status_id, str):
             return status_id.replace(' ', '')
 

@@ -44,37 +44,40 @@ def pytest_bdd_after_scenario(request, feature, scenario):
 def pytest_sessionfinish(session):
     if is_main_loop(session):
         print('Start publishing results')
-        error_message = []
-        for result_file in Session.get_results_files():
+        error_message, suites = [], dict()
+        tr: test_rail.TestRail = pytest.test_rail
+        for result_file in tr.get_results_files():
             with open(result_file, 'r') as file:
-                suites = json.loads(file.read())
+                for key, value in json.loads(file.read()).items():
+                    if key in suites:
+                        suites[key] += value
+                    else:
+                        suites.update({key: value})
             os.remove(result_file)
-            tr: test_rail.TestRail = pytest.test_rail
-            configuration = 'REST, CHINA'
-            plan_id = 653
-            config = sort_configurations(configuration)
-            plan = tr.plans.get_plan(plan_id)
-            suites_list = tr.suites.get_suites()
-            results = []
-            for suite, results_list in suites.items():
-                run_to_add = plan.get_run_from_entry_name_and_config(suite, config)
-                suite_id = tr.service.get_suite_by_name(suite, suites_list)
-                if isinstance(suite_id, Suite):
-                    if run_to_add is None:
-                        run_to_add = add_entry_to_plan(plan_id, suite_id, suite, config)
-                    tr.plans.update_run_in_plan_entry(run_to_add.id, include_all=True)
-                    tests_list = tr.tests.get_tests(run_to_add.id)
-                    for index, test_in_list in enumerate(tests_list):
-                        tests_list[index].title = trim(tests_list[index].title)
-                    for result in results_list:
-                        result_test = [test.id for test in tests_list if test.title == trim(result['name'])]
-                        if len(result_test) == 0:
-                            error_message.append(f'Can\'t find scenario {result["name"]}')
-                        else:
-                            result.update({'test_id': result_test[0]})
-                            results.append(result)
-                    tr.results.add_results(run_id=run_to_add.id, results=results)
-                    tr.service.delete_untested_tests_from_run(run_to_add.id)
+        configuration = 'REST, CHINA'
+        plan_id = 653
+        config = sort_configurations(configuration)
+        plan, suites_list = tr.plans.get_plan(plan_id), tr.suites.get_suites()
+        results = []
+        for suite, results_list in suites.items():
+            run_to_add = plan.get_run_from_entry_name_and_config(suite, config)
+            suite_id = tr.service.get_suite_by_name(suite, suites_list)
+            if isinstance(suite_id, Suite):
+                if run_to_add is None:
+                    run_to_add = add_entry_to_plan(plan_id, suite_id.id, suite, config)
+                tr.plans.update_run_in_plan_entry(run_to_add.id, include_all=True)
+                tests_list = tr.tests.get_tests(run_to_add.id)
+                for index, test_in_list in enumerate(tests_list):
+                    tests_list[index].title = trim(tests_list[index].title)
+                for result in results_list:
+                    result_test = [test.id for test in tests_list if test.title == trim(result['name'])]
+                    if len(result_test) == 0:
+                        error_message.append(f'Can\'t find scenario {result["name"]}')
+                    else:
+                        result.update({'test_id': result_test[0]})
+                        results.append(result)
+                tr.results.add_results(run_id=run_to_add.id, results=results)
+                tr.service.delete_untested_tests_from_run(run_to_add.id)
         if len(error_message) > 0:
             print('\n'.join(error_message))
         print('Results published')
