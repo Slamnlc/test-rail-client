@@ -85,7 +85,6 @@ def pytest_sessionfinish(session):
             if len(error_message) > 0:
                 print('\n'.join(error_message))
             print('Results published')
-        tr._session.close()
 
 
 def add_entry_to_plan(plan_id: int, suite_id: int, name: str, config: list) -> Run:

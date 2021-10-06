@@ -39,6 +39,7 @@ class Session:
         else:
             self._session.headers.update({'Content-Type': 'application/json'})
         response = self._session.request(method=method, url=f'{self.__host}{url}', data=data, params=params, **kwargs)
+        self._session.close()
         if response.status_code in (200, 201):
             if return_type == 'text':
                 return response.text
@@ -77,7 +78,6 @@ class Session:
             self._session.auth, self.__host = Auth(username, token), host
             return
         else:
-
             path, config = os.path.dirname(__file__), configparser.ConfigParser()
             for _ in range(7):
                 for file in ('pytest', 'test_rail'):
