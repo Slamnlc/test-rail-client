@@ -20,67 +20,70 @@ def pytest_configure(config: Config):
 
 
 def pytest_bdd_after_scenario(request, feature, scenario):
-    suite_name = feature.name.split(' - ', maxsplit=1)[0]
-    test_name, examples = request.node.name, scenario.examples.example_params
-    test_examples, steps = test_name.split('[')[-1].replace(']', '').split('-'), []
-    main_name = replace_examples(scenario.name, examples, test_examples)
-    for step in scenario.steps:
-        step_name = replace_examples(step.name, examples, test_examples)
-        step_result = get_status_number(step.failed)
-        data = {
-            'content': f'**{step.keyword}:**{step_name}',
-            'status_id': step_result,
-            'actual': str(step.exception) if step.failed else ''
+    if 'pytest_testrail_export_test_results' in request.config.option and \
+            request.config.option.pytest_testrail_export_test_results is True:
+        suite_name = feature.name.split(' - ', maxsplit=1)[0]
+        test_name, examples = request.node.name, scenario.examples.example_params
+        test_examples, steps = test_name.split('[')[-1].replace(']', '').split('-'), []
+        main_name = replace_examples(scenario.name, examples, test_examples)
+        for step in scenario.steps:
+            step_name = replace_examples(step.name, examples, test_examples)
+            step_result = get_status_number(step.failed)
+            data = {
+                'content': f'**{step.keyword}:**{step_name}',
+                'status_id': step_result,
+                'actual': str(step.exception) if step.failed else ''
+            }
+            steps.append(data)
+        main_result = {
+            'name': main_name,
+            'status_id': get_status_number(scenario.failed),
+            'custom_step_results': steps
         }
-        steps.append(data)
-    main_result = {
-        'name': main_name,
-        'status_id': get_status_number(scenario.failed),
-        'custom_step_results': steps
-    }
-    write_to_file(request, main_result, suite_name)
+        write_to_file(request, main_result, suite_name)
 
 
 def pytest_sessionfinish(session):
-    if is_main_loop(session):
-        print('Start publishing results')
-        error_message, suites = [], dict()
-        tr: test_rail.TestRail = pytest.test_rail
-        for result_file in tr.get_results_files():
-            with open(result_file, 'r') as file:
-                for key, value in json.loads(file.read()).items():
-                    if key in suites:
-                        suites[key] += value
-                    else:
-                        suites.update({key: value})
-            os.remove(result_file)
-        configuration = 'REST, CHINA'
-        plan_id = 653
-        config = sort_configurations(configuration)
-        plan, suites_list = tr.plans.get_plan(plan_id), tr.suites.get_suites()
-        results = []
-        for suite, results_list in suites.items():
-            run_to_add = plan.get_run_from_entry_name_and_config(suite, config)
-            suite_id = tr.service.get_suite_by_name(suite, suites_list)
-            if isinstance(suite_id, Suite):
-                if run_to_add is None:
-                    run_to_add = add_entry_to_plan(plan_id, suite_id.id, suite, config)
-                tr.plans.update_run_in_plan_entry(run_to_add.id, include_all=True)
-                tests_list = tr.tests.get_tests(run_to_add.id)
-                for index, test_in_list in enumerate(tests_list):
-                    tests_list[index].title = trim(tests_list[index].title)
-                for result in results_list:
-                    result_test = [test.id for test in tests_list if test.title == trim(result['name'])]
-                    if len(result_test) == 0:
-                        error_message.append(f'Can\'t find scenario {result["name"]}')
-                    else:
-                        result.update({'test_id': result_test[0]})
-                        results.append(result)
-                tr.results.add_results(run_id=run_to_add.id, results=results)
-                tr.service.delete_untested_tests_from_run(run_to_add.id)
-        if len(error_message) > 0:
-            print('\n'.join(error_message))
-        print('Results published')
+    if 'pytest_testrail_export_test_results' in session.config.option and \
+            session.config.option.pytest_testrail_export_test_results is True:
+        if is_main_loop(session):
+            print('Start publishing results')
+            error_message, suites = [], dict()
+            tr: test_rail.TestRail = pytest.test_rail
+            for result_file in tr.get_results_files():
+                with open(result_file, 'r') as file:
+                    for key, value in json.loads(file.read()).items():
+                        if key in suites:
+                            suites[key] += value
+                        else:
+                            suites.update({key: value})
+                os.remove(result_file)
+            plan_id = session.config.option.pytest_testrail_test_plan_id
+            config = sort_configurations(session.config.option.pytest_testrail_test_configuration_name)
+            plan, suites_list = tr.plans.get_plan(plan_id), tr.suites.get_suites()
+            results = []
+            for suite, results_list in suites.items():
+                run_to_add = plan.get_run_from_entry_name_and_config(suite, config)
+                suite_id = tr.service.get_suite_by_name(suite, suites_list)
+                if isinstance(suite_id, Suite):
+                    if run_to_add is None:
+                        run_to_add = add_entry_to_plan(plan_id, suite_id.id, suite, config)
+                    tr.plans.update_run_in_plan_entry(run_to_add.id, include_all=True)
+                    tests_list = tr.tests.get_tests(run_to_add.id)
+                    for index, test_in_list in enumerate(tests_list):
+                        tests_list[index].title = trim(tests_list[index].title)
+                    for result in results_list:
+                        result_test = [test.id for test in tests_list if test.title == trim(result['name'])]
+                        if len(result_test) == 0:
+                            error_message.append(f'Can\'t find scenario {result["name"]}')
+                        else:
+                            result.update({'test_id': result_test[0]})
+                            results.append(result)
+                    tr.results.add_results(run_id=run_to_add.id, results=results)
+                    tr.service.delete_untested_tests_from_run(run_to_add.id)
+            if len(error_message) > 0:
+                print('\n'.join(error_message))
+            print('Results published')
 
 
 def add_entry_to_plan(plan_id: int, suite_id: int, name: str, config: list) -> Run:
@@ -137,10 +140,12 @@ def pytest_addoption(parser):
     commands = ('--pytest-testrail-export-test-results', '--pytest-testrail-test-plan-id',
                 '--pytest-testrail-test-configuration-name')
     actions = ('store_true', 'store', 'store')
-    types = ('bool', 'int', 'str')
+    types = (None, 'int', 'string')
     defaults = (False, None, None)
     helps = ('TestRail export Test Results', 'TestRail Test Plan to export results',
              'TestRail Test Configuration used for testing')
     for index, value in enumerate(commands):
-        group.addoption(value, action=actions[index], type=types[index],
-                        default=defaults[index], help=helps[index])
+        data = {'action': actions[index], 'default': defaults[index], 'help': helps[index]}
+        if types[index] is not None:
+            data['type'] = types[index]
+        group.addoption(value, **data)
