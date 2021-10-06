@@ -94,4 +94,4 @@ class Plan:
         entries = tuple(entry.runs for entry in self.entries if entry.name.lower() == name.lower())
         if len(entries) > 0:
             result = [run for run in tuple(chain.from_iterable(entries)) if run.config.lower() == config.lower()]
-            return result[0] if len(result) > 0 else []
+            return result[0] if len(result) > 0 else None
