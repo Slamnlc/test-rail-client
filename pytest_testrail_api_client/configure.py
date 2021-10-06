@@ -134,3 +134,13 @@ def write_to_file(request, result: dict, suite_name: str):
 
 def pytest_addoption(parser):
     group = parser.getgroup("pytest-rail")
+    commands = ('--pytest-testrail-export-test-results', '--pytest-testrail-test-plan-id',
+                '--pytest-testrail-test-configuration-name')
+    actions = ('store_true', 'store', 'store')
+    types = ('bool', 'int', 'str')
+    defaults = (False, None, None)
+    helps = ('TestRail export Test Results', 'TestRail Test Plan to export results',
+             'TestRail Test Configuration used for testing')
+    for index, value in enumerate(commands):
+        group.addoption(value, action=actions[index], type=types[index],
+                        default=defaults[index], help=helps[index])
