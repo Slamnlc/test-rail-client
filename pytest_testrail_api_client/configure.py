@@ -64,8 +64,10 @@ def pytest_sessionfinish(session):
                         run_to_add = add_entry_to_plan(plan_id, suite_id, suite, config)
                     tr.plans.update_run_in_plan_entry(run_to_add.id, include_all=True)
                     tests_list = tr.tests.get_tests(run_to_add.id)
+                    for index, test_in_list in enumerate(tests_list):
+                        tests_list[index].title = trim(tests_list[index].title)
                     for result in results_list:
-                        result_test = [test.id for test in tests_list if test.title == result['name']]
+                        result_test = [test.id for test in tests_list if test.title == trim(result['name'])]
                         if len(result_test) == 0:
                             error_message.append(f'Can\'t find scenario {result["name"]}')
                         else:

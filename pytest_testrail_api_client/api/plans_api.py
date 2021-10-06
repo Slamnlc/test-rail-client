@@ -2,7 +2,7 @@ from typing import List
 
 from pytest_testrail_api_client.modules.category import Base
 from pytest_testrail_api_client.modules.plan import Plan, Run, Entries
-from pytest_testrail_api_client.service import get_dict_from_locals, split_by_coma
+from pytest_testrail_api_client.service import get_dict_from_locals, split_by_coma, validate_id
 
 
 class PlansApi(Base):
@@ -67,8 +67,8 @@ class PlansApi(Base):
         :param runs: An array of test runs with configurations, please see the example below for details
         :return:
         """
-        case_ids = split_by_coma(case_ids)
-        config_ids = split_by_coma(config_ids)
+        case_ids = validate_id(case_ids)
+        config_ids = validate_id(config_ids)
         data = get_dict_from_locals(locals(), exclude=['plan_id'])
         return self._valid(self._session.request('post', f'{self.__sub_host}/add_plan_entry/{plan_id}', data=data),
                            Entries)
@@ -90,8 +90,8 @@ class PlansApi(Base):
         :param refs: A comma-separated list of references/requirements
         :return:
         """
-        case_ids = split_by_coma(case_ids)
-        config_ids = split_by_coma(config_ids)
+        case_ids = validate_id(case_ids)
+        config_ids = validate_id(config_ids)
         data = get_dict_from_locals(locals(), exclude=['plan_id', 'entry_id'])
         return self._valid(
             self._session.request('post', f'{self.__sub_host}/add_run_to_plan_entry/{plan_id}/{entry_id}',
@@ -150,7 +150,7 @@ class PlansApi(Base):
         :param refs: A comma-separated list of references/requirements
         :return:
         """
-        case_ids = split_by_coma(case_ids)
+        case_ids = validate_id(case_ids)
         data = get_dict_from_locals(locals(), exclude=['run_id'])
         return self._valid(self._session.request('post', f'{self.__sub_host}/update_run_in_plan_entry/{run_id}',
                                                  data=data), Run)
