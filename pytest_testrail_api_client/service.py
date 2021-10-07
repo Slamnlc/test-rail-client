@@ -2,6 +2,8 @@ from datetime import datetime
 
 from _pytest.config import Config
 from _pytest.main import Session
+from gherkin.parser import Parser
+from gherkin.token_scanner import TokenScanner
 
 
 def get_dict_from_locals(locals_dict: dict, replace_underscore: bool = False, exclude: list = None):
@@ -58,3 +60,8 @@ def get_worker_id(config):
 
 def trim(string: str) -> str:
     return ' '.join(string.split())
+
+
+def get_feature(file_path: str):
+    with open(file_path, "r") as file:
+        return Parser().parse(TokenScanner(file.read()))

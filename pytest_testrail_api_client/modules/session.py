@@ -39,7 +39,6 @@ class Session:
         else:
             self._session.headers.update({'Content-Type': 'application/json'})
         response = self._session.request(method=method, url=f'{self.__host}{url}', data=data, params=params, **kwargs)
-        self._session.close()
         if response.status_code in (200, 201):
             if return_type == 'text':
                 return response.text
