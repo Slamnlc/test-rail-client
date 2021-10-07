@@ -9,7 +9,7 @@ from pytest_testrail_api_client.modules.classes import Suite
 from pytest_testrail_api_client.modules.exceptions import TestRailError
 from pytest_testrail_api_client.modules.plan import Run
 from pytest_testrail_api_client.modules.session import Session
-from pytest_testrail_api_client.service import is_main_loop, trim, get_feature
+from pytest_testrail_api_client.service import is_main_loop, trim, get_feature, get_features
 
 
 def pytest_configure(config: Config):
@@ -22,10 +22,8 @@ def pytest_configure(config: Config):
 def pytest_collection_modifyitems(config, items):
     config.option.markexpr = 'not not_in_scope'
     print('\nUn-select all tests. Exporting is selected')
-    abs_path = os.path.join(config.rootdir, 'App/tests/content')
-    feature_files = [f"{root}/{file}" for root, dirs, files in os.walk(abs_path, topdown=False)
-                     for file in files if file.split('.')[-1] == 'feature']
-    features = tuple(get_feature(feature) for feature in feature_files)
+    abs_path = os.path.join(config.rootdir, 'Rest/tests/groups')
+    features = get_features(abs_path, pytest.test_rail.suites.get_suites())
 
     for item in items:
         item.add_marker(pytest.mark.not_in_scope)

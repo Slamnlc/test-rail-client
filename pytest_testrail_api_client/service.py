@@ -1,9 +1,12 @@
+import os
 from datetime import datetime
 
 from _pytest.config import Config
 from _pytest.main import Session
 from gherkin.parser import Parser
 from gherkin.token_scanner import TokenScanner
+
+from pytest_testrail_api_client.modules.bdd_classes import TrFeature
 
 
 def get_dict_from_locals(locals_dict: dict, replace_underscore: bool = False, exclude: list = None):
@@ -60,6 +63,15 @@ def get_worker_id(config):
 
 def trim(string: str) -> str:
     return ' '.join(string.split())
+
+
+def get_features(path: str, suites_list):
+    feature_files = tuple(f"{root}/{file}" for root, dirs, files in os.walk(path, topdown=False)
+                          for file in files if file.split('.')[-1] == 'feature')
+    features = []
+    for f in feature_files:
+        features.append(TrFeature(get_feature(f)))
+    1 == 1
 
 
 def get_feature(file_path: str):
