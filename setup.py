@@ -18,7 +18,9 @@ setup(
     packages=setuptools.find_packages(exclude=("tests", "dev_tools")),
     install_requires=[
         'requests',
-        'pytest'
+        'pytest',
+        'gherkin-official>=4.1.0',
+        'pytest-bdd>=3.3.0'
     ],
     entry_points={
         "pytest11": [

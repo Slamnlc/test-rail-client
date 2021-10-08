@@ -23,7 +23,8 @@ def pytest_collection_modifyitems(config, items):
     config.option.markexpr = 'not not_in_scope'
     print('\nUn-select all tests. Exporting is selected')
     abs_path = os.path.join(config.rootdir, 'Rest/tests/groups')
-    features = get_features(abs_path, pytest.test_rail.suites.get_suites())
+
+    features = get_features(abs_path, pytest.test_rail)
 
     for item in items:
         item.add_marker(pytest.mark.not_in_scope)

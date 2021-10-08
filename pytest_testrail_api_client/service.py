@@ -5,7 +5,6 @@ from _pytest.config import Config
 from _pytest.main import Session
 from gherkin.parser import Parser
 from gherkin.token_scanner import TokenScanner
-
 from pytest_testrail_api_client.modules.bdd_classes import TrFeature
 
 
@@ -65,15 +64,26 @@ def trim(string: str) -> str:
     return ' '.join(string.split())
 
 
-def get_features(path: str, suites_list):
+def get_features(path: str, test_rail):
     feature_files = tuple(f"{root}/{file}" for root, dirs, files in os.walk(path, topdown=False)
                           for file in files if file.split('.')[-1] == 'feature')
     features = []
-    for f in feature_files:
-        features.append(TrFeature(get_feature(f)))
+    suites_list = test_rail.suites.get_suites()
+    sections = {suite.id: test_rail.sections.get_sections(suite.id) for suite in suites_list}
+    for feature in feature_files:
+        parsed_feature = TrFeature(get_feature(feature))
+        suite_id = tuple(suite.id for suite in suites_list if parsed_feature.main_suite == suite.name)
+        if len(suite_id) > 0:
+            parsed_feature.main_suite = suite_id[0]
+            section_id = tuple(section.id for section in sections[parsed_feature.main_suite] if
+                               section.name == parsed_feature.last_section)
+            if len(section_id) > 0:
+                section_id = section_id[0]
+
+        features.append(TrFeature(get_feature(feature)))
     1 == 1
 
 
 def get_feature(file_path: str):
     with open(file_path, "r") as file:
-        return Parser().parse(TokenScanner(file.read()))
+        return Parser().parse(TokenScanner(file.read()))['feature']
