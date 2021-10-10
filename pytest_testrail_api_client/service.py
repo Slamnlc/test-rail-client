@@ -5,6 +5,7 @@ from _pytest.config import Config
 from _pytest.main import Session
 from gherkin.parser import Parser
 from gherkin.token_scanner import TokenScanner
+
 from pytest_testrail_api_client.modules.bdd_classes import TrFeature
 
 
@@ -87,3 +88,7 @@ def get_features(path: str, test_rail):
 def get_feature(file_path: str):
     with open(file_path, "r") as file:
         return Parser().parse(TokenScanner(file.read()))['feature']
+
+
+def make_step(step: dict) -> str:
+    return f'**{step["keyword"].replace(" ", "")}** {trim(step["text"])}'

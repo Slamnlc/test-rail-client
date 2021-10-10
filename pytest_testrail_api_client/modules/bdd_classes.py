@@ -1,3 +1,6 @@
+from pytest_testrail_api_client.service import make_step
+
+
 class TrFeature:
     def __init__(self, data: dict):
         if data is not None:
@@ -14,6 +17,14 @@ class TrFeature:
                 name = self.name.split(' - ')
                 self.main_suite, self.last_section = name[0], name[-1]
             if self.children is not None:
+                background = tuple(filter(lambda x: 'background' in x, self.children))
+                if len(background) > 0:
+                    background = [make_step(step) for step in background[0]['background']['steps']]
+                    self.children.pop(0)
+                else:
+                    background = None
                 for scenario in self.children:
-                    pass
-
+                    if background is not None:
+                        scenario['scenario']['steps'] = background + [make_step(step) for step in
+                                                                      scenario['scenario']['steps']]
+                1 == 1
