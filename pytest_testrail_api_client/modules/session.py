@@ -93,13 +93,13 @@ class Session:
                                 return
                 path = os.path.dirname(path)
 
-            env_username, env_token = os.environ.get('SAUCELAB_USERNAME', None), os.environ.get('SAUCELAB_TOKEN', None)
-            env_host = os.environ.get('SAUCELAB_HOST', None)
+            env_username, env_token = os.environ.get('TESTRAIL_EMAIL', None), os.environ.get('TESTRAIL_KEY', None)
+            env_host = os.environ.get('TESTRAIL_URL', None)
             if all((env_username, env_token, env_host)):
                 self._session.auth = Auth(env_username, env_token)
                 self.__host = env_host
                 if env_policy == 'clear':
-                    tuple(map(os.environ.pop, ('SAUCELAB_USERNAME', 'SAUCELAB_TOKEN', 'SAUCELAB_HOST')))
+                    tuple(map(os.environ.pop, ('TESTRAIL_EMAIL', 'TESTRAIL_KEY', 'TESTRAIL_URL')))
                 return
         self.__host = '/'
         self._session.auth = Auth('', '')
