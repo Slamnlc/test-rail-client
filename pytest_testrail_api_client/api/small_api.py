@@ -128,3 +128,6 @@ class PrioritiesApi(Base):
         :return:
         """
         return self._valid(self._session.request('get', f'{self.__sub_host}/get_priorities'), Priority)
+
+    def _service_priorities(self):
+        return {priority.name.lower(): priority.id for priority in self.get_priorities()}
