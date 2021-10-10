@@ -1,15 +1,14 @@
 import json
 import os
-from os import path
-import pytest
-from _pytest.config import Config
 
+import pytest
 import pytest_testrail_api_client.test_rail as test_rail
+from _pytest.config import Config
 from pytest_testrail_api_client.modules.classes import Suite
 from pytest_testrail_api_client.modules.exceptions import TestRailError
 from pytest_testrail_api_client.modules.plan import Run
 from pytest_testrail_api_client.modules.session import Session
-from pytest_testrail_api_client.service import is_main_loop, trim, get_feature, get_features
+from pytest_testrail_api_client.service import is_main_loop, trim, get_features
 
 
 def pytest_configure(config: Config):
@@ -23,10 +22,20 @@ def pytest_collection_modifyitems(config, items):
     pass
     config.option.markexpr = 'not not_in_scope'
     print('\nUn-select all tests. Exporting is selected')
-    abs_path = os.path.join(config.rootdir, 'Rest/tests/groups')
+    abs_path = os.path.join(config.rootdir, 'tests/groups')
 
     features = get_features(abs_path, pytest.test_rail)
+    cases_list = {suite: pytest.test_rail.cases.get_cases(suite_id=suite) for suite
+                  in set(feature.main_suite for feature in features)}
+    for feature in features:
+        for scenario in feature.children:
+            sc, case = scenario['scenario'], dict()
+            case.update({'title': sc['name'], 'custom_steps_separated': sc['steps'], **sc['custom_fields']})
+            if 'priority' in sc:
+                case.update({'priority_id': sc['priority'][0]})
 
+            for field_id, name in sc['custom_fields']:
+                pass
     for item in items:
         item.add_marker(pytest.mark.not_in_scope)
 
