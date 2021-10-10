@@ -71,13 +71,15 @@ def get_features(path: str, test_rail):
     features = []
     suites_list = test_rail.suites.get_suites()
     custom_tags = test_rail.case_fields._service_case_fields()
+    case_types = test_rail.case_types._service_case_types()
     sections = {suite.id: test_rail.sections.get_sections(suite.id) for suite in suites_list}
     for feature in feature_files:
         parsed_feature = TrFeature(get_feature(feature))
         for scenario in parsed_feature.children:
             tags = tuple(tag['name'].lower().replace('@', '') for tag in scenario['scenario']['tags'])
-
-            scenario['case_types'] = tuple([x['id'], x['name']] for x in custom_tags if x.name.lower() in tags)
+            scenario['scenario']['types'] = tuple(value for key, value in case_types.items() if key in tags)
+            scenario['scenario']['custom_fields'] = tuple((value['id'], value['name']) for key, value
+                                                          in custom_tags.items() if key in tags)
         suite_id = tuple(suite.id for suite in suites_list if parsed_feature.main_suite == suite.name)
         if len(suite_id) > 0:
             parsed_feature.main_suite = suite_id[0]

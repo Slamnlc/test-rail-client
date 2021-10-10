@@ -59,6 +59,9 @@ class CaseTypesApi(Base):
         """
         return self._valid(self._session.request('get', f'{self.__sub_host}/get_case_types'), CaseType)
 
+    def _service_case_types(self):
+        return {case_type.name.lower(): case_type.id for case_type in self.get_case_types()}
+
 
 class TemplatesApi(Base):
     __sub_host = '/api/v2'
