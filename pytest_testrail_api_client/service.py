@@ -5,6 +5,7 @@ from _pytest.config import Config
 from _pytest.main import Session
 from gherkin.parser import Parser
 from gherkin.token_scanner import TokenScanner
+
 from pytest_testrail_api_client.modules.bdd_classes import TrFeature
 
 
