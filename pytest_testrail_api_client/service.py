@@ -70,19 +70,24 @@ def get_features(path: str, test_rail):
                           for file in files if file.split('.')[-1] == 'feature')
     features = []
     suites_list = test_rail.suites.get_suites()
+    custom_tags = test_rail.case_fields._service_case_fields()
     sections = {suite.id: test_rail.sections.get_sections(suite.id) for suite in suites_list}
     for feature in feature_files:
         parsed_feature = TrFeature(get_feature(feature))
+        for scenario in parsed_feature.children:
+            tags = tuple(tag['name'].lower().replace('@', '') for tag in scenario['scenario']['tags'])
+
+            scenario['case_types'] = tuple([x['id'], x['name']] for x in custom_tags if x.name.lower() in tags)
         suite_id = tuple(suite.id for suite in suites_list if parsed_feature.main_suite == suite.name)
         if len(suite_id) > 0:
             parsed_feature.main_suite = suite_id[0]
             section_id = tuple(section.id for section in sections[parsed_feature.main_suite] if
                                section.name == parsed_feature.last_section)
             if len(section_id) > 0:
-                section_id = section_id[0]
+                parsed_feature.last_section = section_id[0]
 
-        features.append(TrFeature(get_feature(feature)))
-    1 == 1
+        features.append(parsed_feature)
+    return features
 
 
 def get_feature(file_path: str):
@@ -90,5 +95,9 @@ def get_feature(file_path: str):
         return Parser().parse(TokenScanner(file.read()))['feature']
 
 
-def make_step(step: dict) -> str:
-    return f'**{step["keyword"].replace(" ", "")}** {trim(step["text"])}'
+def _make_step(step: dict) -> str:
+    return {'content': f'**{step["keyword"].replace(" ", "")}**: {trim(step["text"])}', 'expected': ''}
+
+
+def _get_custom_tags(tags: dict, case_fields: list):
+    pass

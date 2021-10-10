@@ -21,14 +21,14 @@ def pytest_configure(config: Config):
 
 def pytest_collection_modifyitems(config, items):
     pass
-    # config.option.markexpr = 'not not_in_scope'
-    # print('\nUn-select all tests. Exporting is selected')
-    # abs_path = os.path.join(config.rootdir, 'Rest/tests/groups')
-    #
-    # features = get_features(abs_path, pytest.test_rail)
+    config.option.markexpr = 'not not_in_scope'
+    print('\nUn-select all tests. Exporting is selected')
+    abs_path = os.path.join(config.rootdir, 'Rest/tests/groups')
 
-    # for item in items:
-    #     item.add_marker(pytest.mark.not_in_scope)
+    features = get_features(abs_path, pytest.test_rail)
+
+    for item in items:
+        item.add_marker(pytest.mark.not_in_scope)
 
 
 @pytest.hookimpl(tryfirst=True)

@@ -88,6 +88,18 @@ class CaseFieldsApi(Base):
         """
         return self._valid(self._session.request('get', f'{self.__sub_host}/get_case_fields'), CaseField)
 
+    def _service_case_fields(self) -> dict:
+        serv = dict()
+        for field in self.get_case_fields():
+            for config in field.configs:
+                if hasattr(config.options, 'items'):
+                    for key, value in config.options.items.items():
+                        if key.lower() == 'to be automated':
+                            serv.update({'to_automate': {'id': value, 'name': field.system_name}})
+                        else:
+                            serv.update({key.replace(' ', '_').lower(): {'id': value, 'name': field.system_name}})
+        return serv
+
 
 class ResultsFieldsApi(Base):
     __sub_host = '/api/v2'
