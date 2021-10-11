@@ -19,28 +19,29 @@ def pytest_configure(config: Config):
 
 
 def pytest_collection_modifyitems(config, items):
-    config.option.markexpr = 'not not_in_scope'
-    print('\nUn-select all tests. Exporting is selected')
-    abs_path = os.path.join(config.rootdir, 'tests/groups')
-    features = get_features(abs_path, pytest.test_rail)
-    cases_list = {suite: pytest.test_rail.cases.get_cases(suite_id=suite) for suite
-                  in set(feature.main_suite for feature in features)}
-    for feature in features:
-        for scenario in feature.children:
-            sc, case = scenario['scenario'], dict()
-            tr_case = tuple(filter(lambda x: trim(x.title) == sc['name'], cases_list[feature.main_suite]))
-            case.update({'section_id': feature.last_section, 'title': sc['name'],
-                         'custom_steps_separated': sc['steps'], **sc['custom_fields']})
-            if 'priority' in sc:
-                case.update({'priority_id': sc['priority'][0]})
-            if len(tr_case) > 0:
-                pytest.test_rail.cases.add_case(**case)
-                # tr_case = tr_case[0]
-                # pytest.test_rail
-            else:
-                pytest.test_rail.cases.add_case(**case)
-    for item in items:
-        item.add_marker(pytest.mark.not_in_scope)
+    pass
+    # config.option.markexpr = 'not not_in_scope'
+    # print('\nUn-select all tests. Exporting is selected')
+    # abs_path = os.path.join(config.rootdir, 'tests/groups')
+    # features = get_features(abs_path, pytest.test_rail)
+    # cases_list = {suite: pytest.test_rail.cases.get_cases(suite_id=suite) for suite
+    #               in set(feature.main_suite for feature in features)}
+    # for feature in features:
+    #     for scenario in feature.children:
+    #         sc, case = scenario['scenario'], dict()
+    #         tr_case = tuple(filter(lambda x: trim(x.title) == sc['name'], cases_list[feature.main_suite]))
+    #         case.update({'section_id': feature.last_section, 'title': sc['name'],
+    #                      'custom_steps_separated': sc['steps'], **sc['custom_fields']})
+    #         if 'priority' in sc:
+    #             case.update({'priority_id': sc['priority'][0]})
+    #         if len(tr_case) > 0:
+    #             pytest.test_rail.cases.add_case(**case)
+    #             # tr_case = tr_case[0]
+    #             # pytest.test_rail
+    #         else:
+    #             pytest.test_rail.cases.add_case(**case)
+    # for item in items:
+    #     item.add_marker(pytest.mark.not_in_scope)
 
 
 @pytest.hookimpl(tryfirst=True)
