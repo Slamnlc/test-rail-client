@@ -128,3 +128,10 @@ def _get_case_options(case_tags: list, tr_tags: dict, tr_case_types: dict, tr_pr
             cases_type.append(value), case_tags.remove(key)
 
     return custom_fields, cases_type, priority
+
+
+def replace_examples(where: str, examples: list, variables: list):
+    for index, param in enumerate(examples):
+        if len(variables) > index:
+            where = where.replace(f'<{param}>', variables[index])
+    return where

@@ -9,7 +9,7 @@ from pytest_testrail_api_client.modules.classes import Suite
 from pytest_testrail_api_client.modules.exceptions import TestRailError
 from pytest_testrail_api_client.modules.plan import Run
 from pytest_testrail_api_client.modules.session import Session
-from pytest_testrail_api_client.service import is_main_loop, trim, get_features
+from pytest_testrail_api_client.service import is_main_loop, trim, get_features, replace_examples
 
 
 def pytest_configure(config: Config):
@@ -21,39 +21,39 @@ def pytest_configure(config: Config):
 
 def pytest_collection_modifyitems(config, items):
     pass
-    config.option.markexpr = 'not not_in_scope'
-    print('\nUn-select all tests. Exporting is selected')
-    abs_path = os.path.join(config.rootdir, 'tests/groups')
-    features = get_features(abs_path, pytest.test_rail)
-    cases_list = {suite: pytest.test_rail.cases.get_cases(suite_id=suite) for suite
-                  in set(feature.main_suite for feature in features)}
-    template_id = next((template.id for template in pytest.test_rail.templates.get_templates()
-                        if template.name == 'Test Case (Steps)'), None)
-    for feature in features:
-        for scenario in feature.children:
-            sc = scenario['scenario']
-            case = {
-                'section_id': feature.last_section,
-                'title': sc['name'],
-                'custom_steps_separated': sc['steps'],
-                'estimate': '5m',
-                'template_id': template_id,
-                **sc['custom_fields']
-            }
-            if 'priority' in sc:
-                case.update({'priority_id': sc['priority'][0]})
-            if 'types' in sc:
-                case.update({'type_id': sc['types'][0]})
-            tr_case = tuple(filter(lambda x: trim(x.title) == sc['name'], cases_list[feature.main_suite]))
-            if len(tr_case) > 0:
-                x = pytest.test_rail.cases.add_case(**case)
-                pytest.test_rail.cases.delete_case(x.id)
-                # tr_case = tr_case[0]
-                # pytest.test_rail
-            else:
-                pytest.test_rail.cases.add_case(**case)
-    for item in items:
-        item.add_marker(pytest.mark.not_in_scope)
+    # config.option.markexpr = 'not not_in_scope'
+    # print('\nUn-select all tests. Exporting is selected')
+    # abs_path = os.path.join(config.rootdir, 'tests/groups')
+    # features = get_features(abs_path, pytest.test_rail)
+    # cases_list = {suite: pytest.test_rail.cases.get_cases(suite_id=suite) for suite
+    #               in set(feature.main_suite for feature in features)}
+    # template_id = next((template.id for template in pytest.test_rail.templates.get_templates()
+    #                     if template.name == 'Test Case (Steps)'), None)
+    # for feature in features:
+    #     for scenario in feature.children:
+    #         sc = scenario['scenario']
+    #         case = {
+    #             'section_id': feature.last_section,
+    #             'title': sc['name'],
+    #             'custom_steps_separated': sc['steps'],
+    #             'estimate': '5m',
+    #             'template_id': template_id,
+    #             **sc['custom_fields']
+    #         }
+    #         if 'priority' in sc:
+    #             case.update({'priority_id': sc['priority'][0]})
+    #         if 'types' in sc:
+    #             case.update({'type_id': sc['types'][0]})
+    #         tr_case = tuple(filter(lambda x: trim(x.title) == sc['name'], cases_list[feature.main_suite]))
+    #         if len(tr_case) > 0:
+    #             x = pytest.test_rail.cases.add_case(**case)
+    #             pytest.test_rail.cases.delete_case(x.id)
+    #             # tr_case = tr_case[0]
+    #             # pytest.test_rail
+    #         else:
+    #             pytest.test_rail.cases.add_case(**case)
+    # for item in items:
+    #     item.add_marker(pytest.mark.not_in_scope)
 
 
 @pytest.hookimpl(tryfirst=True)
@@ -134,13 +134,6 @@ def add_entry_to_plan(plan_id: int, suite_id: int, name: str, config: list) -> R
         return entry.runs[0]
     else:
         raise TestRailError(entry)
-
-
-def replace_examples(where: str, examples: list, variables: list):
-    for index, param in enumerate(examples):
-        if len(variables) > index:
-            where = where.replace(f'<{param}>', variables[index])
-    return where
 
 
 def sort_configurations(configuration) -> str:
