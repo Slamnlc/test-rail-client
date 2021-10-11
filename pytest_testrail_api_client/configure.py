@@ -28,7 +28,7 @@ def pytest_collection_modifyitems(config, items):
     cases_list = {suite: pytest.test_rail.cases.get_cases(suite_id=suite) for suite
                   in set(feature.main_suite for feature in features)}
     template_id = next((template.id for template in pytest.test_rail.templates.get_templates()
-                        if template.name == 'Tes Case (Steps)'), None)
+                        if template.name == 'Test Case (Steps)'), None)
     for feature in features:
         for scenario in feature.children:
             sc = scenario['scenario']
@@ -36,12 +36,14 @@ def pytest_collection_modifyitems(config, items):
                 'section_id': feature.last_section,
                 'title': sc['name'],
                 'custom_steps_separated': sc['steps'],
-                'estimate': '12m',
+                'estimate': '5m',
                 'template_id': template_id,
                 **sc['custom_fields']
             }
             if 'priority' in sc:
                 case.update({'priority_id': sc['priority'][0]})
+            if 'types' in sc:
+                case.update({'type_id': sc['types'][0]})
             tr_case = tuple(filter(lambda x: trim(x.title) == sc['name'], cases_list[feature.main_suite]))
             if len(tr_case) > 0:
                 x = pytest.test_rail.cases.add_case(**case)

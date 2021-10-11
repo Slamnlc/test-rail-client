@@ -69,8 +69,11 @@ def trim(string: str) -> str:
 
 
 def get_features(path: str, test_rail):
-    feature_files = tuple(f"{root}/{file}" for root, dirs, files in os.walk(path, topdown=False)
-                          for file in files if file.split('.')[-1] == 'feature')
+    if path.split('.')[-1] == 'feature':
+        feature_files = [path]
+    else:
+        feature_files = tuple(f"{root}/{file}" for root, dirs, files in os.walk(path, topdown=False)
+                              for file in files if file.split('.')[-1] == 'feature')
     features = []
     suites_list = test_rail.suites.get_suites()
     custom_tags = test_rail.case_fields._service_case_fields()
