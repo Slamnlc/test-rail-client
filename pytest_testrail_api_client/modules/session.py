@@ -82,8 +82,8 @@ class Session:
             if all((env_username, env_token, env_host)):
                 self._session.auth = Auth(env_username, env_token)
                 self.__host = env_host
-                if env_policy == 'clear':
-                    tuple(map(os.environ.pop, ('TESTRAIL_EMAIL', 'TESTRAIL_KEY', 'TESTRAIL_URL')))
+                # if env_policy == 'clear':
+                #     tuple(map(os.environ.pop, ('TESTRAIL_EMAIL', 'TESTRAIL_KEY', 'TESTRAIL_URL')))
                 return
 
             path, config = os.path.dirname(__file__), configparser.ConfigParser()
