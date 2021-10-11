@@ -79,6 +79,7 @@ class Session:
         else:
             env_username, env_token = os.environ.get('TESTRAIL_EMAIL', None), os.environ.get('TESTRAIL_KEY', None)
             env_host = os.environ.get('TESTRAIL_URL', None)
+            raise Exception(env_username, env_token, env_host)
             if all((env_username, env_token, env_host)):
                 self._session.auth = Auth(env_username, env_token)
                 self.__host = env_host
