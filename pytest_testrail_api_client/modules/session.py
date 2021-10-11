@@ -78,7 +78,7 @@ class Session:
             return
         else:
             path, config = os.path.dirname(__file__), configparser.ConfigParser()
-            for _ in range(7):
+            for _ in range(9):
                 for file in ('pytest', 'test_rail'):
                     file_name = os.path.join(path, f'{file}.ini')
                     if os.path.isfile(file_name):
