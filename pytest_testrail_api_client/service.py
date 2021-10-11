@@ -10,7 +10,7 @@ from pytest_testrail_api_client.modules.bdd_classes import TrFeature
 
 
 def get_dict_from_locals(locals_dict: dict, replace_underscore: bool = False, exclude: list = None):
-    exclude = ('self', 'kwargs') if exclude is None else tuple(['self'] + exclude)
+    exclude = ('self', 'kwargs') if exclude is None else tuple(['self', 'kwargs'] + exclude)
     result = {key if replace_underscore else key: value for key, value in
               locals_dict.items() if key not in exclude and '__py' not in key and value is not None}
     if 'kwargs' in locals_dict:
@@ -102,7 +102,7 @@ def get_feature(file_path: str):
 
 
 def _make_step(step: dict) -> str:
-    return {'content': f'**{step["keyword"].replace(" ", "")}**: {trim(step["text"])}'}
+    return {'content': f'**{step["keyword"].replace(" ", "")}:** {trim(step["text"])}', 'expected': ''}
 
 
 def _get_case_options(case_tags: list, tr_tags: dict, tr_case_types: dict, tr_priority: dict):

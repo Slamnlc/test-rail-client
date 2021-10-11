@@ -47,7 +47,7 @@ class CasesApi(Base):
                            CaseHistory)
 
     def add_case(self, section_id: int, title: str, template_id: int = None, type_id: int = None,
-                 priority_id: int = None, estimate=None, milestone_id: int = None, refs: str = None):
+                 priority_id: int = None, estimate=None, milestone_id: int = None, refs: str = None, **kwargs):
         """
         https://www.gurock.com/testrail/docs/api/reference/cases#addcase
 
