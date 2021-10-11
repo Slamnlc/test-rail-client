@@ -92,7 +92,7 @@ class Session:
                                 self.__host = test_rail['testrail-url']
                                 return
                 path = os.path.dirname(path)
-
+            print('env')
             env_username, env_token = os.environ.get('TESTRAIL_EMAIL', None), os.environ.get('TESTRAIL_KEY', None)
             env_host = os.environ.get('TESTRAIL_URL', None)
             if all((env_username, env_token, env_host)):
