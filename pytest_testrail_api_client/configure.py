@@ -20,6 +20,7 @@ def pytest_configure(config: Config):
 
 
 def pytest_collection_modifyitems(config, items):
+    x = pytest.test_rail.configs.get_configs()
     pass
     # config.option.markexpr = 'not not_in_scope'
     # print('\nUn-select all tests. Exporting is selected')
