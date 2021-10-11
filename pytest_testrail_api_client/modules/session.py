@@ -77,6 +77,15 @@ class Session:
             self._session.auth, self.__host = Auth(username, token), host
             return
         else:
+            env_username, env_token = os.environ.get('TESTRAIL_EMAIL', None), os.environ.get('TESTRAIL_KEY', None)
+            env_host = os.environ.get('TESTRAIL_URL', None)
+            if all((env_username, env_token, env_host)):
+                self._session.auth = Auth(env_username, env_token)
+                self.__host = env_host
+                if env_policy == 'clear':
+                    tuple(map(os.environ.pop, ('TESTRAIL_EMAIL', 'TESTRAIL_KEY', 'TESTRAIL_URL')))
+                return
+
             path, config = os.path.dirname(__file__), configparser.ConfigParser()
             for _ in range(9):
                 for file in ('pytest', 'test_rail'):
@@ -92,15 +101,6 @@ class Session:
                                 self.__host = test_rail['testrail-url']
                                 return
                 path = os.path.dirname(path)
-            print('env')
-            env_username, env_token = os.environ.get('TESTRAIL_EMAIL', None), os.environ.get('TESTRAIL_KEY', None)
-            env_host = os.environ.get('TESTRAIL_URL', None)
-            if all((env_username, env_token, env_host)):
-                self._session.auth = Auth(env_username, env_token)
-                self.__host = env_host
-                if env_policy == 'clear':
-                    tuple(map(os.environ.pop, ('TESTRAIL_EMAIL', 'TESTRAIL_KEY', 'TESTRAIL_URL')))
-                return
         self.__host = '/'
         self._session.auth = Auth('', '')
 
