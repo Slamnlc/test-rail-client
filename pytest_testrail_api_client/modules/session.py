@@ -77,6 +77,7 @@ class Session:
             self._session.auth, self.__host = Auth(username, token), host
             return
         else:
+            raise Exception(os.environ)
             env_username, env_token = os.environ.get('TESTRAIL_EMAIL', None), os.environ.get('TESTRAIL_KEY', None)
             env_host = os.environ.get('TESTRAIL_URL', None)
             raise Exception(env_username, env_token, env_host)
