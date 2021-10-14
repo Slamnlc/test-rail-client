@@ -184,7 +184,8 @@ class PlansApi(Base):
         :param entry_id: The ID of the test plan entry (note: not the test run ID)
         :return: status code
         """
-        return self._session.request('post', f'{self.__sub_host}/delete_plan_entry/{plan_id}/{entry_id}')
+        return self._session.request('post', f'{self.__sub_host}/delete_plan_entry/{plan_id}/{entry_id}',
+                                     return_type='status_code')
 
     def delete_run_from_plan_entry(self, run_id: int) -> int:
         """

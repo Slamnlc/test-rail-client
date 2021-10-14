@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+from typing import List, Union
 
 from _pytest.config import Config
 from _pytest.main import Session
@@ -130,8 +131,41 @@ def _get_case_options(case_tags: list, tr_tags: dict, tr_case_types: dict, tr_pr
     return custom_fields, cases_type, priority
 
 
-def replace_examples(where: str, examples: list, variables: list):
+def replace_examples(where: str, examples: list, variables: str, all_vars: list):
+    current_vars, variables = [], variables.lower()
+    for var in all_vars:
+        if all((x.lower() in variables for x in var)):
+            current_vars = var
+            break
     for index, param in enumerate(examples):
-        if len(variables) > index:
-            where = where.replace(f'<{param}>', variables[index])
+        if len(current_vars) > index:
+            where = where.replace(f'<{param}>', current_vars[index])
     return where
+
+
+def to_json(obj_list: List[object]) -> dict:
+    return tuple(obj.to_json() if 'to_json' in dir(obj) else obj.__dict__ for obj in obj_list)
+
+
+def split_list(array: List[Union[tuple, list]], separator: int = 250) -> list:
+    if isinstance(array, (tuple, list)):
+        if isinstance(separator, int):
+            if len(array) > 0:
+                result, index = [], 0
+                while True:
+                    result.append(array[index:index + separator])
+                    index += separator
+                    if index > len(array):
+                        break
+                return result
+            else:
+                return []
+        else:
+            raise ValueError('separator must be integer')
+    else:
+        raise ValueError('array variable must be tuple or list')
+
+
+def validate_variable(variable, var_types, var_name: str):
+    if not isinstance(variable, var_types):
+        raise ValueError(f'{var_name} must be {var_types}')

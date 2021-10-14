@@ -20,3 +20,7 @@ class Result(Base):
             self.created_by: int = data.get('created_by')
             self.custom_step_results: list = data.get('custom_step_results')
             self.attachment_ids: list = data.get('attachment_ids')
+
+    def to_json(self):
+        extra_keys, result = ('session', '_session', 'created_on', 'created_by'), dict()
+        return {key: value for key, value in self.__dict__.items() if key not in extra_keys and value is not None}

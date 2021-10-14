@@ -4,12 +4,12 @@ import os
 import pytest
 from _pytest.config import Config
 
-import pytest_testrail_api_client.test_rail as test_rail
+from pytest_testrail_api_client import test_rail
 from pytest_testrail_api_client.modules.classes import Suite
 from pytest_testrail_api_client.modules.exceptions import TestRailError
 from pytest_testrail_api_client.modules.plan import Run
 from pytest_testrail_api_client.modules.session import Session
-from pytest_testrail_api_client.service import is_main_loop, trim, get_features, replace_examples
+from pytest_testrail_api_client.service import is_main_loop, trim, replace_examples
 
 
 def pytest_configure(config: Config):
@@ -63,10 +63,10 @@ def pytest_bdd_after_scenario(request, feature, scenario):
             request.config.option.pytest_testrail_export_test_results is True:
         suite_name = feature.name.split(' - ', maxsplit=1)[0]
         test_name, examples = request.node.name, scenario.examples.example_params
-        test_examples, steps = test_name.split('[')[-1].replace(']', '').split('-'), []
-        main_name = replace_examples(scenario.name, examples, test_examples)
+        test_examples, steps = test_name.split('[')[-1].replace(']', ''), []
+        main_name = replace_examples(scenario.name, examples, test_examples, scenario.examples.examples)
         for step in scenario.steps:
-            step_name = replace_examples(step.name, examples, test_examples)
+            step_name = replace_examples(step.name, examples, test_examples, scenario.examples.examples)
             step_result = get_status_number(step.failed)
             data = {
                 'content': f'**{step.keyword}:**{step_name}',
