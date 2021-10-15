@@ -8,7 +8,7 @@ from pytest_testrail_api_client.api.runs_api import RunsApi
 from pytest_testrail_api_client.api.sections_api import SectionsApi
 from pytest_testrail_api_client.api.service_api import ServiceApi
 from pytest_testrail_api_client.api.small_api import TestsApi, StatusesApi, CaseTypesApi, TemplatesApi, CaseFieldsApi, \
-    ResultsFieldsApi, PrioritiesApi
+    ResultsFieldsApi, PrioritiesApi, SharedStepsApi, ReportsApi
 from pytest_testrail_api_client.api.suites_api import SuitesApi
 from pytest_testrail_api_client.api.user_api import UsersApi
 from pytest_testrail_api_client.modules.session import Session
@@ -87,3 +87,11 @@ class TestRail(Session):
     @property
     def service(self):
         return ServiceApi(self)
+
+    @property
+    def shared_steps(self):
+        return SharedStepsApi(self)
+
+    @property
+    def reports(self):
+        return ReportsApi(self)

@@ -3,7 +3,7 @@ from typing import List
 from pytest_testrail_api_client.modules.case_field import CaseField
 from pytest_testrail_api_client.modules.category import Base
 from pytest_testrail_api_client.modules.classes import Status, CaseType, Template, ResultField, Priority, TestObj
-from pytest_testrail_api_client.service import validate_id
+from pytest_testrail_api_client.service import validate_id, get_dict_from_locals
 
 
 class StatusesApi(Base):
@@ -91,6 +91,27 @@ class CaseFieldsApi(Base):
         """
         return self._valid(self._session.request('get', f'{self.__sub_host}/get_case_fields'), CaseField)
 
+    def add_case_field(self, field_type: str, name: str, label: str, configs: list, description: str = None,
+                       include_all: bool = None,
+                       template_ids: (tuple, list) = None):
+        """
+        https://www.gurock.com/testrail/docs/api/reference/case-fields#addcasefield
+
+        Creates a new test case custom field
+        :param field_type: The type identifier for the new custom field (required)
+        :param name: The name for new the custom field (required)
+        :param label: The label for the new custom field (required)
+        :param configs: An object wrapped in an array with two default keys, ‘context’ and ‘options’ (required)
+        :param description: The description for the new custom field
+        :param include_all: Set flag to true if you want the new custom field included for all templates.
+                    Otherwise (false) specify the ID’s of templates to be included as the next parameter (template_ids)
+        :param template_ids: ID’s of templates new custom field will apply to if include_all is set to false
+        :return:
+        """
+        data = get_dict_from_locals(locals(), exclude=['field_type'])
+        data.update({'type': field_type})
+        return self._valid(self._session.request('post', f'{self.__sub_host}/add_case_field', data=data), CaseField)
+
     def _service_case_fields(self) -> dict:
         serv = dict()
         for field in self.get_case_fields():
@@ -131,3 +152,35 @@ class PrioritiesApi(Base):
 
     def _service_priorities(self):
         return {priority.name.lower(): priority.id for priority in self.get_priorities()}
+
+
+class SharedStepsApi(Base):
+    __sub_host = '/api/v2'
+
+    def get_shared_steps(self, project_id: int = None):
+        """
+        https://www.gurock.com/testrail/docs/api/reference/api-shared-steps#getsharedsteps
+
+        Returns a list of shared steps for a project.
+        :param project_id: The ID of the project. If not indicated - takes default project_id
+        :return:
+        """
+        if project_id is None:
+            project_id = self._session.project_id
+        return self._session.request('get', f'{self.__sub_host}/get_shared_steps/{project_id}')
+
+
+class ReportsApi(Base):
+    __sub_host = '/api/v2'
+
+    def get_reports(self, project_id: int = None):
+        """
+        https://www.gurock.com/testrail/docs/api/reference/reports#getreports
+
+        Returns a list of API available reports by project
+        :param project_id: The ID of the project. If not indicated - takes default project_id
+        :return:
+        """
+        if project_id is None:
+            project_id = self._session.project_id
+        return self._session.request('get', f'{self.__sub_host}/get_reports/{project_id}')

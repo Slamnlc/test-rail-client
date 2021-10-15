@@ -31,14 +31,16 @@ class ServiceApi(Base):
         self._session.plans.update_run_in_plan_entry(run_id=run_id, include_all=False, case_ids=case_ids)
 
     def copy_run_to_plan(self, run_id: int, plan_id: int, delete_untested: bool = True,
-                         delete_original_run: bool = False) -> Run:
+                         delete_original_run: bool = False, milestone_id: int = None) -> Run:
         run = self._session.runs.get_run(run_id)
         run_tests = self._session.tests.get_tests(run_id)
         cases_ids = tuple(test.case_id for test in run_tests)
-        run_to_add = [{'include_all': False, 'config_ids': run.config_ids, 'case_ids': cases_ids}]
+        run_to_add = {'include_all': False, 'config_ids': run.config_ids, 'case_ids': cases_ids}
+        if milestone_id is not None and isinstance(milestone_id, int):
+            run_to_add.update({'milestone_id': milestone_id})
         new_entry = self._session.plans.add_plan_entry(plan_id, suite_id=run.suite_id, name=run.name,
                                                        description=run.description, config_ids=run.config_ids,
-                                                       runs=run_to_add)
+                                                       runs=[run_to_add])
         new_run_id = new_entry.runs[-1].id
 
         self.copy_results_from_run(run_id, new_run_id, run_tests)
