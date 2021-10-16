@@ -1,4 +1,5 @@
 import os
+from copy import deepcopy
 from datetime import datetime
 from typing import List, Union
 
@@ -102,7 +103,25 @@ def get_features(path: str, test_rail):
 
 def get_feature(file_path: str):
     with open(file_path, "r") as file:
-        return Parser().parse(TokenScanner(file.read()))['feature']
+        feature = TrFeature(Parser().parse(TokenScanner(file.read()))['feature'])
+    examples_scenarios = []
+    for scenario in feature.children:
+        if len(scenario['scenario']['examples']) > 0:
+            examples = scenario['scenario']['examples'][0]
+            examples_names = tuple(var_name['value'] for var_name in examples['tableHeader']['cells'])
+            examples_values = []
+            for var in tuple(var['cells'] for var in examples['tableBody']):
+                examples_values.append([y['value'] for y in var])
+            for example in examples_values:
+                sc = deepcopy(scenario)
+                for index, name in enumerate(examples_names):
+                    sc['scenario']['name'] = sc['scenario']['name'].replace(f'<{name}>', example[index])
+                    for step in sc['scenario']['steps']:
+                        step['content'] = step['content'].replace(f'<{name}>', example[index])
+                examples_scenarios.append(sc)
+            feature.children.remove(scenario)
+    for scenario in examples_scenarios:
+        feature.children.append(scenario)
 
 
 def _make_step(step: dict) -> str:

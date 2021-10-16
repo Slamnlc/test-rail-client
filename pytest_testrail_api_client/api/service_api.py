@@ -51,8 +51,12 @@ class ServiceApi(Base):
 
         return new_entry.runs[-1]
 
-    def copy_results_from_run(self, old_run_id: int, new_run_id: int, old_tests: List[Result] = None):
-        statuses = tuple(status.id for status in self._session.statuses.get_statuses())
+    def copy_results_from_run(self, old_run_id: int, new_run_id: int, old_tests: List[Result] = None,
+                              status_id: list = None, overwrite_results: list = None):
+        if status_id is not None:
+            statuses = tuple(status.id for status in self._session.statuses.get_statuses() if status.id in status_id)
+        else:
+            statuses = tuple(status.id for status in self._session.statuses.get_statuses())
         results = sorted(self._session.results.get_results_for_run(old_run_id, status_id=statuses),
                          key=lambda result: result.created_on, reverse=False)
         if old_tests is None:
@@ -62,9 +66,17 @@ class ServiceApi(Base):
         for old_test in old_tests:
             old_results = tuple(filter(lambda x: x.test_id == old_test.id, results))
             if len(old_results) > 0:
-                new_test_id = next((x.id for x in new_tests if x.title == old_test.title), None)
-                if new_test_id is not None:
-                    for res in old_results:
-                        res.test_id = new_test_id
+                new_test = next((x for x in new_tests if x.title == old_test.title), None)
+                if new_test is not None:
+                    if overwrite_results is not None:
+                        copy_results = True if new_test.status_id in overwrite_results else False
+                    else:
+                        copy_results = True
+                    if copy_results:
+                        for res in old_results:
+                            res.test_id = new_test.id
+                    else:
+                        for res in old_results:
+                            results.remove(res)
 
         self._session.results.add_results(new_run_id, to_json(results))
