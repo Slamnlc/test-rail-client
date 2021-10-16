@@ -84,7 +84,7 @@ def get_features(path: str, test_rail):
     priority_list = test_rail.priorities._service_priorities()
     sections = {suite.id: test_rail.sections.get_sections(suite.id) for suite in suites_list}
     for feature in feature_files:
-        parsed_feature = TrFeature(get_feature(feature))
+        parsed_feature = get_feature(feature)
         for scenario in parsed_feature.children:
             tags = list(tag['name'].lower().replace('@', '') for tag in scenario['scenario']['tags'])
             scenario['scenario']['custom_fields'], scenario['scenario']['types'], scenario['scenario']['priority'] = \
@@ -123,7 +123,7 @@ def get_feature(file_path: str):
             feature.children.remove(scenario)
     for scenario in examples_scenarios:
         feature.children.append(scenario)
-
+    return feature
 
 def _make_step(step: dict) -> str:
     return {'content': f'**{step["keyword"].replace(" ", "")}:** {trim(step["text"])}', 'expected': ''}
