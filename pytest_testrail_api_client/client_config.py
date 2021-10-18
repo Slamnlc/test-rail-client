@@ -1,4 +1,4 @@
-TR_PREFIX = 'C'
+TR_PREFIX = '@C'
 
 PRIORITY_REPLACE = {
     'Critical': ['smoke'],

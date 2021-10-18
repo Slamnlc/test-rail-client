@@ -5,6 +5,7 @@ import pytest
 from _pytest.config import Config
 
 from pytest_testrail_api_client import test_rail
+from pytest_testrail_api_client.client_config import TR_PREFIX
 from pytest_testrail_api_client.modules.classes import Suite
 from pytest_testrail_api_client.modules.exceptions import TestRailError
 from pytest_testrail_api_client.modules.plan import Run
@@ -47,8 +48,9 @@ def pytest_collection_modifyitems(config, items):
                 case.update({'type_id': sc['types'][0]})
             tr_case = tuple(filter(lambda x: trim(x.title) == sc['name'], cases_list[feature.main_suite]))
             if len(tr_case) > 0:
-                x = pytest.test_rail.cases.add_case(**case)
-                _write_feature()
+                new_case = pytest.test_rail.cases.add_case(**case)
+                location = sc['tags'][0]['location']
+                _write_feature(feature.path, location['line'], location['column'], TR_PREFIX + new_case.id)
                 pytest.test_rail.cases.delete_case(x.id)
                 # tr_case = tr_case[0]
                 # pytest.test_rail
