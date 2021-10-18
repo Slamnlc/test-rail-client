@@ -24,72 +24,73 @@ def pytest_configure(config: Config):
 def pytest_collection_modifyitems(config, items):
     x = pytest.test_rail.configs.get_configs()
     pass
-    config.option.markexpr = 'not not_in_scope'
-    print('\nUn-select all tests. Exporting is selected')
-    abs_path = os.path.join(config.rootdir, 'App/tests/content/features')
-    features = get_features(abs_path, pytest.test_rail)
-    cases_list = {suite: pytest.test_rail.cases.get_cases(suite_id=suite) for suite
-                  in set(feature.main_suite for feature in features)}
-    template_id = next((template.id for template in pytest.test_rail.templates.get_templates()
-                        if template.name == 'Test Case (Steps)'), None)
-    total_tests, current_test = sum((len(x.children) for x in features)), 1
-    for feature in features:
-        for scenario in feature.children:
-            sc = scenario['scenario']
-            case = {
-                'section_id': feature.last_section,
-                'title': sc['name'],
-                'custom_steps_separated': sc['steps'],
-                'estimate': '5m',
-                'template_id': template_id,
-                **sc['custom_fields']
-            }
-            if 'priority' in sc:
-                case.update({'priority_id': sc['priority']})
-            if 'types' in sc:
-                case.update({'type_id': sc['types'][0]})
-            tr_case = next(filter(lambda x: trim(x.title) == sc['name'], cases_list[feature.main_suite]), None)
-            current_scenario = Case(case)
-            txt = f'scenario {current_scenario.title} in feature {feature.name}. {current_test} of {total_tests}'
-            if tr_case is not None:
-                if current_scenario.is_equal(tr_case):
-                    print(f'Can\'t find any changes in {txt}')
-                else:
-                    print(f'Updating {txt}')
-                    pytest.test_rail.cases.update_case(**case)
-            else:
-                print(f'Upload new {txt}')
-                new_case = pytest.test_rail.cases.add_case(**case)
-                location = sc['tags'][0]['location']
-                _write_feature(feature.path, location['line'], location['column'] - 1, TR_PREFIX + str(new_case.id))
-            current_test += 1
-    for item in items:
-        item.add_marker(pytest.mark.not_in_scope)
-
-
-@pytest.hookimpl(tryfirst=True)
-def pytest_bdd_after_scenario(request, feature, scenario):
-    if 'pytest_testrail_export_test_results' in request.config.option and \
-            request.config.option.pytest_testrail_export_test_results is True:
-        suite_name = feature.name.split(' - ', maxsplit=1)[0]
-        test_name, examples = request.node.name, scenario.examples.example_params
-        test_examples, steps = test_name.split('[')[-1].replace(']', ''), []
-        main_name = replace_examples(scenario.name, examples, test_examples, scenario.examples.examples)
-        for step in scenario.steps:
-            step_name = replace_examples(step.name, examples, test_examples, scenario.examples.examples)
-            step_result = get_status_number(step.failed)
-            data = {
-                'content': f'**{step.keyword}:**{step_name}',
-                'status_id': step_result,
-                'actual': str(step.exception) if step.failed else ''
-            }
-            steps.append(data)
-        main_result = {
-            'name': main_name,
-            'status_id': get_status_number(scenario.failed),
-            'custom_step_results': steps
-        }
-        write_to_file(request, main_result, suite_name)
+#     config.option.markexpr = 'not not_in_scope'
+#     print('\nUn-select all tests. Exporting is selected')
+#     abs_path = os.path.join(config.rootdir, 'App/tests/content/features/filters_and_sorting.feature')
+#     features = get_features(abs_path, pytest.test_rail)
+#     cases_list = {suite: pytest.test_rail.cases.get_cases(suite_id=suite) for suite
+#                   in set(feature.main_suite for feature in features)}
+#     template_id = next((template.id for template in pytest.test_rail.templates.get_templates()
+#                         if template.name == 'Test Case (Steps)'), None)
+#     total_tests, current_test = sum((len(x.children) for x in features)), 1
+#     for feature in features:
+#         for scenario in feature.children:
+#             sc = scenario['scenario']
+#             case = {
+#                 'section_id': feature.last_section,
+#                 'title': sc['name'],
+#                 'custom_steps_separated': sc['steps'],
+#                 'estimate': '5m',
+#                 'template_id': template_id,
+#                 **sc['custom_fields']
+#             }
+#             if 'priority' in sc:
+#                 case.update({'priority_id': sc['priority']})
+#             if 'types' in sc:
+#                 case.update({'type_id': sc['types'][0]})
+#             tr_case = next(filter(lambda x: trim(x.title) == sc['name'], cases_list[feature.main_suite]), None)
+#             current_scenario = Case(case)
+#             txt = f'scenario {current_scenario.title} in feature {feature.path}. {current_test} of {total_tests}'
+#             if tr_case is not None:
+#                 if current_scenario.is_equal(tr_case):
+#                     print(f'Can\'t find any changes in {txt}')
+#                 else:
+#                     print(f'Updating {txt}')
+#                     case.update({'case_id': tr_case.id})
+#                     pytest.test_rail.cases.update_case(**case)
+#             else:
+#                 print(f'Upload new {txt}')
+#                 new_case = pytest.test_rail.cases.add_case(**case)
+#                 location = sc['tags'][0]['location']
+#                 _write_feature(feature.path, location['line'], location['column'] - 1, TR_PREFIX + str(new_case.id))
+#             current_test += 1
+#     for item in items:
+#         item.add_marker(pytest.mark.not_in_scope)
+#
+#
+# @pytest.hookimpl(tryfirst=True)
+# def pytest_bdd_after_scenario(request, feature, scenario):
+#     if 'pytest_testrail_export_test_results' in request.config.option and \
+#             request.config.option.pytest_testrail_export_test_results is True:
+#         suite_name = feature.name.split(' - ', maxsplit=1)[0]
+#         test_name, examples = request.node.name, scenario.examples.example_params
+#         test_examples, steps = test_name.split('[')[-1].replace(']', ''), []
+#         main_name = replace_examples(scenario.name, examples, test_examples, scenario.examples.examples)
+#         for step in scenario.steps:
+#             step_name = replace_examples(step.name, examples, test_examples, scenario.examples.examples)
+#             step_result = get_status_number(step.failed)
+#             data = {
+#                 'content': f'**{step.keyword}:**{step_name}',
+#                 'status_id': step_result,
+#                 'actual': str(step.exception) if step.failed else ''
+#             }
+#             steps.append(data)
+#         main_result = {
+#             'name': main_name,
+#             'status_id': get_status_number(scenario.failed),
+#             'custom_step_results': steps
+#         }
+#         write_to_file(request, main_result, suite_name)
 
 
 def pytest_sessionfinish(session):
@@ -179,18 +180,11 @@ def write_to_file(request, result: dict, suite_name: str):
 
 def pytest_addoption(parser):
     group = parser.getgroup("pytest-rail")
-    commands = ('--pytest-testrail-export-test-results', '--pytest-testrail-test-plan-id',
-                '--pytest-testrail-test-configuration-name')
-    actions = ('store_true', 'store', 'store')
-    types = (None, 'int', 'string')
-    defaults = (False, None, None)
-    helps = ('TestRail export Test Results', 'TestRail Test Plan to export results',
-             'TestRail Test Configuration used for testing')
-    for index, value in enumerate(commands):
-        data = {'action': actions[index], 'default': defaults[index], 'help': helps[index]}
-        if types[index] is not None:
-            data['type'] = types[index]
-        group.addoption(value, **data)
+    group.addoption('--pytest-testrail-export-test-results', action='store_true', default=False)
+    group.addoption('--pytest-testrail-test-plan-id', action='store')
+    group.addoption('--pytest-testrail-test-configuration-name', action='store')
+    group.addoption("--pytest-testrail-export-test-cases", action="store_true")
+    group.addoption("--pytest-testrail-feature-files-relative-path", action="store", default=None)
 
 
 def pytest_bdd_step_error(scenario, step, exception):

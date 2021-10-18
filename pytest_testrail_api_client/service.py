@@ -8,7 +8,7 @@ from _pytest.main import Session
 from gherkin.parser import Parser
 from gherkin.token_scanner import TokenScanner
 
-from pytest_testrail_api_client.client_config import PRIORITY_REPLACE, SECTIONS_SEPARATOR
+from pytest_testrail_api_client.client_config import PRIORITY_REPLACE
 from pytest_testrail_api_client.modules.bdd_classes import TrFeature
 from pytest_testrail_api_client.modules.exceptions import MissingSuiteInFeature
 
@@ -96,8 +96,9 @@ def get_features(path: str, test_rail):
             parsed_feature.main_suite = suite_id
             parent_id = None
             for section in parsed_feature.sections:
-                tr_section = next((sn for sn in sections if sn.name == section and sn.parent_id == parent_id), None)
-                if tr_section is not None:
+                tr_section = next((sn for sn in sections[suite_id] if sn.name == section and sn.parent_id == parent_id),
+                                  None)
+                if tr_section is None:
                     parent_id = test_rail.sections.add_section(section, suite_id=suite_id, parent_id=parent_id).id
                 else:
                     parent_id = tr_section.id
@@ -108,24 +109,10 @@ def get_features(path: str, test_rail):
     return features
 
 
-def add_sections(test_rail, section_path: str, description: str, suite_id: int, sections_list: list = None):
-    if sections_list is None:
-        sections_list = test_rail.sections.get_sections(suite_id=suite_id)
-    parent_id = None
-    for section_name in section_path.split(SECTIONS_SEPARATOR)[1:]:
-        tr_section = next((tuple(trim(section) for section in sections_list if section.name == section_name)), None)
-        if tr_section is not None:
-            parent_id = tr_section.id
-        else:
-            parent_id = test_rail.sections.add_section(section_name, description=description, suite_id=suite_id,
-                                                       parent_id=parent_id).id
-    return parent_id
-
-
 def get_feature(file_path: str):
     with open(file_path, "r") as file:
         feature = TrFeature(Parser().parse(TokenScanner(file.read()))['feature'], file_path)
-    examples_scenarios = []
+    examples_scenarios, to_delete = [], []
     for scenario in feature.children:
         if len(scenario['scenario']['examples']) > 0:
             examples = scenario['scenario']['examples'][0]
@@ -142,7 +129,9 @@ def get_feature(file_path: str):
                             step['content'] = step['text']
                         step['content'] = step['content'].replace(f'<{name}>', example[index])
                 examples_scenarios.append(sc)
-            feature.children.remove(scenario)
+            to_delete.append(scenario)
+    for scenario in to_delete:
+        feature.children.remove(scenario)
     for scenario in examples_scenarios:
         feature.children.append(scenario)
     return feature
