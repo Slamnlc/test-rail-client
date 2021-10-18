@@ -9,7 +9,7 @@ from pytest_testrail_api_client.modules.classes import Suite
 from pytest_testrail_api_client.modules.exceptions import TestRailError
 from pytest_testrail_api_client.modules.plan import Run
 from pytest_testrail_api_client.modules.session import Session
-from pytest_testrail_api_client.service import is_main_loop, trim, replace_examples, get_features
+from pytest_testrail_api_client.service import is_main_loop, trim, replace_examples, get_features, _write_feature
 
 
 def pytest_configure(config: Config):
@@ -48,6 +48,7 @@ def pytest_collection_modifyitems(config, items):
             tr_case = tuple(filter(lambda x: trim(x.title) == sc['name'], cases_list[feature.main_suite]))
             if len(tr_case) > 0:
                 x = pytest.test_rail.cases.add_case(**case)
+                _write_feature()
                 pytest.test_rail.cases.delete_case(x.id)
                 # tr_case = tr_case[0]
                 # pytest.test_rail

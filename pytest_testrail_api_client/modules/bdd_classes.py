@@ -2,8 +2,9 @@ import pytest_testrail_api_client.service as service
 
 
 class TrFeature:
-    def __init__(self, data: dict):
+    def __init__(self, data: dict, path: str):
         if data is not None:
+            self.path = path
             self.tags: list = data.get('tags')
             self.location: dict = data.get('location')
             self.language: str = data.get('language')

@@ -104,7 +104,7 @@ def get_features(path: str, test_rail):
 
 def get_feature(file_path: str):
     with open(file_path, "r") as file:
-        feature = TrFeature(Parser().parse(TokenScanner(file.read()))['feature'])
+        feature = TrFeature(Parser().parse(TokenScanner(file.read()))['feature'], file_path)
     examples_scenarios = []
     for scenario in feature.children:
         if len(scenario['scenario']['examples']) > 0:
