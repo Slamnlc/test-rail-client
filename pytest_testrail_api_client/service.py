@@ -10,6 +10,7 @@ from gherkin.token_scanner import TokenScanner
 
 from pytest_testrail_api_client.client_config import PRIORITY_REPLACE, SECTIONS_SEPARATOR
 from pytest_testrail_api_client.modules.bdd_classes import TrFeature
+from pytest_testrail_api_client.modules.exceptions import MissingSuiteInFeature
 
 
 def get_dict_from_locals(locals_dict: dict, replace_underscore: bool = False, exclude: list = None):
@@ -105,9 +106,7 @@ def get_features(path: str, test_rail):
                 add_sections(test_rail, parsed_feature.name, parsed_feature.description, parsed_feature.main_suite,
                              sections[parsed_feature.main_suite])
         else:
-            pass
-            # TODO: add exception about missing suite name in feature
-
+            raise MissingSuiteInFeature(f'Missing suite in {feature}')
         features.append(parsed_feature)
     return features
 
@@ -121,9 +120,8 @@ def add_sections(test_rail, section_path: str, description: str, suite_id: int, 
         if tr_section is not None:
             parent_id = tr_section.id
         else:
-            new_section = test_rail.sections.add_section(section_name, description=description, suite_id=suite_id,
-                                                         parent_id=parent_id)
-            parent_id = new_section.id
+            parent_id = test_rail.sections.add_section(section_name, description=description, suite_id=suite_id,
+                                                       parent_id=parent_id).id
     return parent_id
 
 
