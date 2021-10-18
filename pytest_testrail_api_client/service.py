@@ -94,6 +94,7 @@ def get_features(path: str, test_rail):
         suite_id = next((suite.id for suite in suites_list if parsed_feature.main_suite == suite.name), None)
         if suite_id is not None:
             parsed_feature.main_suite = suite_id
+            x = feature.sections
             section_id = next((section.id for section in sections[parsed_feature.main_suite] if
                                section.name == parsed_feature.last_section and
                                trim(section.description) == parsed_feature.description), None)

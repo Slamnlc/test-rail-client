@@ -1,4 +1,5 @@
 import pytest_testrail_api_client.service as service
+from pytest_testrail_api_client.client_config import SECTIONS_SEPARATOR
 
 
 class TrFeature:
@@ -16,11 +17,11 @@ class TrFeature:
             if self.description is not None:
                 self.description = ' '.join(self.description.split())
             self.children: list = data.get('children')
-            self.main_suite, self.last_section = None, None
+            self.main_suite, self.sections = None, None
             self.background = None
             if self.name is not None:
-                name = self.name.split(' - ')
-                self.main_suite, self.last_section = name[0], name[-1]
+                name = self.name.split(SECTIONS_SEPARATOR)
+                self.main_suite, self.sections = name[0], name[1:]
             if self.children is not None:
                 background = tuple(filter(lambda x: 'background' in x, self.children))
                 if len(background) > 0:
