@@ -8,7 +8,7 @@ from _pytest.main import Session
 from gherkin.parser import Parser
 from gherkin.token_scanner import TokenScanner
 
-from pytest_testrail_api_client.client_config import PRIORITY_REPLACE
+from pytest_testrail_api_client.client_config import PRIORITY_REPLACE, SECTIONS_SEPARATOR
 from pytest_testrail_api_client.modules.bdd_classes import TrFeature
 
 
@@ -94,18 +94,37 @@ def get_features(path: str, test_rail):
         if suite_id is not None:
             parsed_feature.main_suite = suite_id
             section_id = next((section.id for section in sections[parsed_feature.main_suite] if
-                               section.name == parsed_feature.last_section), None)
+                               section.name == parsed_feature.last_section and
+                               trim(section.description) == parsed_feature.description), None)
+            if suite_id is None:
+                section_id = next((section.id for section in sections[parsed_feature.main_suite] if
+                                   section.name == parsed_feature.last_section), None)
             if section_id is not None:
                 parsed_feature.last_section = section_id
             else:
-                pass
-                # TODO: add section to testrail
+                add_sections(test_rail, parsed_feature.name, parsed_feature.description, parsed_feature.main_suite,
+                             sections[parsed_feature.main_suite])
         else:
             pass
             # TODO: add exception about missing suite name in feature
 
         features.append(parsed_feature)
     return features
+
+
+def add_sections(test_rail, section_path: str, description: str, suite_id: int, sections_list: list = None):
+    if sections_list is None:
+        sections_list = test_rail.sections.get_sections(suite_id=suite_id)
+    parent_id = None
+    for section_name in section_path.split(SECTIONS_SEPARATOR)[1:]:
+        tr_section = next((tuple(trim(section) for section in sections_list if section.name == section_name)), None)
+        if tr_section is not None:
+            parent_id = tr_section.id
+        else:
+            new_section = test_rail.sections.add_section(section_name, description=description, suite_id=suite_id,
+                                                         parent_id=parent_id)
+            parent_id = new_section.id
+    return parent_id
 
 
 def get_feature(file_path: str):

@@ -125,6 +125,8 @@ class Section:
             self.id: int = data.get('id')
             self.suite_id: int = data.get('suite_id')
             self.name: str = data.get('name')
+            if self.name is not None:
+                self.name = ' '.join(self.name.split())
             self.description: str = data.get('description')
             self.parent_id = data.get('parent_id')
             self.display_order: int = data.get('display_order')

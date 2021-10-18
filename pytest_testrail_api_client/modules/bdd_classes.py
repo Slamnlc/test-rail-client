@@ -13,6 +13,8 @@ class TrFeature:
             if self.name is not None:
                 self.name = service.trim(self.name)
             self.description: str = data.get('description')
+            if self.description is not None:
+                self.description = ' '.join(self.description.split())
             self.children: list = data.get('children')
             self.main_suite, self.last_section = None, None
             self.background = None
