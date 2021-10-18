@@ -130,7 +130,7 @@ def _make_step(step: dict) -> str:
 
 
 def _get_case_options(case_tags: list, tr_tags: dict, tr_case_types: dict, tr_priority: dict):
-    custom_fields, cases_type, priority = dict(), [], []
+    custom_fields, cases_type, priority = dict(), [], None
     for key, value in tr_tags.items():
         if key in case_tags:
             if value['name'] in custom_fields:
@@ -141,11 +141,13 @@ def _get_case_options(case_tags: list, tr_tags: dict, tr_case_types: dict, tr_pr
     for key, value in custom_fields.items():
         if len(value) == 1:
             custom_fields[key] = value[0]
-    for key, value in PRIORITY_REPLACE:
+    for key, value in PRIORITY_REPLACE.items():
         for val in value:
             if val.lower() in case_tags:
-                priority = key
+                priority = tr_priority[key.lower()]
                 break
+    if priority is None:
+        priority = tr_priority['low']
     for key, value in tr_case_types.items():
         if key in case_tags:
             cases_type.append(value), case_tags.remove(key)
