@@ -48,10 +48,10 @@ def pytest_collection_modifyitems(config, items):
                 case.update({'priority_id': sc['priority']})
             if 'types' in sc:
                 case.update({'type_id': sc['types'][0]})
-            tr_case = tuple(filter(lambda x: trim(x.title) == sc['name'], cases_list[feature.main_suite]))
+            tr_case = next(filter(lambda x: trim(x.title) == sc['name'], cases_list[feature.main_suite]), None)
             current_scenario = Case(case)
             txt = f'scenario {current_scenario.title} in feature {feature.name}. {current_test} of {total_tests}'
-            if len(tr_case) > 0:
+            if tr_case is not None:
                 if current_scenario.is_equal(tr_case):
                     print(f'Can\'t find any changes in {txt}')
                 else:
