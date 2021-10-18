@@ -49,20 +49,20 @@ def pytest_collection_modifyitems(config, items):
             if 'types' in sc:
                 case.update({'type_id': sc['types'][0]})
             tr_case = tuple(filter(lambda x: trim(x.title) == sc['name'], cases_list[feature.main_suite]))
-            x = Case(case)
+            current_scenario = Case(case)
+            txt = f'scenario {current_scenario.title} in feature {feature.name}. {current_test} of {total_tests}'
             if len(tr_case) > 0:
-                new_case = pytest.test_rail.cases.add_case(**case)
-                location = sc['tags'][0]['location']
-                _write_feature(feature.path, location['line'], location['column'] - 1, TR_PREFIX + str(new_case.id))
-                pytest.test_rail.cases.delete_case(new_case.id)
-                # tr_case = tr_case[0]
-                # pytest.test_rail
+                if current_scenario.is_equal(tr_case):
+                    print(f'Can\'t find any changes in {txt}')
+                else:
+                    print(f'Updating {txt}')
+                    pytest.test_rail.cases.update_case(**case)
             else:
+                print(f'Upload new {txt}')
                 new_case = pytest.test_rail.cases.add_case(**case)
                 location = sc['tags'][0]['location']
                 _write_feature(feature.path, location['line'], location['column'] - 1, TR_PREFIX + str(new_case.id))
                 pytest.test_rail.cases.delete_case(new_case.id)
-                pytest.test_rail.cases.add_case(**case)
     for item in items:
         item.add_marker(pytest.mark.not_in_scope)
 
