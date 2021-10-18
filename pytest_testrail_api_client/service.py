@@ -94,18 +94,14 @@ def get_features(path: str, test_rail):
         suite_id = next((suite.id for suite in suites_list if parsed_feature.main_suite == suite.name), None)
         if suite_id is not None:
             parsed_feature.main_suite = suite_id
-            x = feature.sections
-            section_id = next((section.id for section in sections[parsed_feature.main_suite] if
-                               section.name == parsed_feature.last_section and
-                               trim(section.description) == parsed_feature.description), None)
-            if suite_id is None:
-                section_id = next((section.id for section in sections[parsed_feature.main_suite] if
-                                   section.name == parsed_feature.last_section), None)
-            if section_id is not None:
-                parsed_feature.last_section = section_id
-            else:
-                add_sections(test_rail, parsed_feature.name, parsed_feature.description, parsed_feature.main_suite,
-                             sections[parsed_feature.main_suite])
+            parent_id = None
+            for section in parsed_feature.sections:
+                tr_section = next((sn for sn in sections if sn.name == section and sn.parent_id == parent_id), None)
+                if tr_section is not None:
+                    parent_id = test_rail.sections.add_section(section, suite_id=suite_id, parent_id=parent_id).id
+                else:
+                    parent_id = tr_section.id
+            parsed_feature.last_section = parent_id
         else:
             raise MissingSuiteInFeature(f'Missing suite in {feature}')
         features.append(parsed_feature)

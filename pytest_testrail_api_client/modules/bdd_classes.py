@@ -18,7 +18,7 @@ class TrFeature:
                 self.description = ' '.join(self.description.split())
             self.children: list = data.get('children')
             self.main_suite, self.sections = None, None
-            self.background = None
+            self.background, self.last_section = None, None
             if self.name is not None:
                 name = self.name.split(SECTIONS_SEPARATOR)
                 self.main_suite, self.sections = name[0], name[1:]
