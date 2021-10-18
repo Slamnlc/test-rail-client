@@ -62,7 +62,7 @@ def pytest_collection_modifyitems(config, items):
                 new_case = pytest.test_rail.cases.add_case(**case)
                 location = sc['tags'][0]['location']
                 _write_feature(feature.path, location['line'], location['column'] - 1, TR_PREFIX + str(new_case.id))
-                pytest.test_rail.cases.delete_case(new_case.id)
+            current_test += 1
     for item in items:
         item.add_marker(pytest.mark.not_in_scope)
 
