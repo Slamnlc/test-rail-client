@@ -6,6 +6,7 @@ from _pytest.config import Config
 
 from pytest_testrail_api_client import test_rail
 from pytest_testrail_api_client.client_config import TR_PREFIX
+from pytest_testrail_api_client.modules.case import Case
 from pytest_testrail_api_client.modules.classes import Suite
 from pytest_testrail_api_client.modules.exceptions import TestRailError
 from pytest_testrail_api_client.modules.plan import Run
@@ -25,12 +26,13 @@ def pytest_collection_modifyitems(config, items):
     pass
     config.option.markexpr = 'not not_in_scope'
     print('\nUn-select all tests. Exporting is selected')
-    abs_path = os.path.join(config.rootdir, 'App/tests/content/features/filters_and_sorting.feature')
+    abs_path = os.path.join(config.rootdir, 'App/tests/content/features')
     features = get_features(abs_path, pytest.test_rail)
     cases_list = {suite: pytest.test_rail.cases.get_cases(suite_id=suite) for suite
                   in set(feature.main_suite for feature in features)}
     template_id = next((template.id for template in pytest.test_rail.templates.get_templates()
                         if template.name == 'Test Case (Steps)'), None)
+    total_tests, current_test = sum((len(x.children) for x in features)), 1
     for feature in features:
         for scenario in feature.children:
             sc = scenario['scenario']
@@ -47,14 +49,19 @@ def pytest_collection_modifyitems(config, items):
             if 'types' in sc:
                 case.update({'type_id': sc['types'][0]})
             tr_case = tuple(filter(lambda x: trim(x.title) == sc['name'], cases_list[feature.main_suite]))
+            x = Case(case)
             if len(tr_case) > 0:
                 new_case = pytest.test_rail.cases.add_case(**case)
                 location = sc['tags'][0]['location']
-                _write_feature(feature.path, location['line'], location['column'], TR_PREFIX + new_case.id)
-                pytest.test_rail.cases.delete_case(x.id)
+                _write_feature(feature.path, location['line'], location['column'] - 1, TR_PREFIX + str(new_case.id))
+                pytest.test_rail.cases.delete_case(new_case.id)
                 # tr_case = tr_case[0]
                 # pytest.test_rail
             else:
+                new_case = pytest.test_rail.cases.add_case(**case)
+                location = sc['tags'][0]['location']
+                _write_feature(feature.path, location['line'], location['column'] - 1, TR_PREFIX + str(new_case.id))
+                pytest.test_rail.cases.delete_case(new_case.id)
                 pytest.test_rail.cases.add_case(**case)
     for item in items:
         item.add_marker(pytest.mark.not_in_scope)

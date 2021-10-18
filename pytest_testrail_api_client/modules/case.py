@@ -34,6 +34,22 @@ class Case:
     def __str__(self):
         return self.title
 
+    def is_equal(self, case):
+        self_dict, case_dict = self.__dict__, case.__dict__
+        if self.title == case.title:
+            for attribute in ('section_id', 'type_id', 'estimate', 'milestone_id', 'priority_id', 'refs', 'suite_id',
+                              'template_id'):
+                if attribute in self_dict and attribute in case_dict:
+                    if self_dict[attribute] != case_dict[attribute]:
+                        return False
+                else:
+                    return False
+            custom_attributes_self = {key: value for key, value in self_dict.items() if key.startswith('custom_')}
+            custom_attributes_case = {key: value for key, value in case_dict.items() if key.startswith('custom_')}
+            if custom_attributes_self != custom_attributes_case:
+                return False
+        return True
+
 
 class CaseHistory:
     def __init__(self, data: dict):
