@@ -40,7 +40,11 @@ class Case:
             for attribute in ('section_id', 'type_id', 'estimate', 'milestone_id', 'priority_id', 'refs', 'suite_id',
                               'template_id'):
                 if attribute in self_dict and attribute in case_dict:
-                    if self_dict[attribute] != case_dict[attribute]:
+                    if attribute == 'custom_steps_separated':
+                        if not all((step['content'] == case.custom_steps_separated[index]['content'] for index, step in
+                                    enumerate(self.custom_steps_separated))):
+                            return False
+                    elif str(self_dict[attribute]) != str(case_dict[attribute]):
                         return False
                 else:
                     return False
