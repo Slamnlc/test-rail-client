@@ -125,6 +125,7 @@ def get_feature(file_path: str):
         feature.children.append(scenario)
     return feature
 
+
 def _make_step(step: dict) -> str:
     return {'content': f'**{step["keyword"].replace(" ", "")}:** {trim(step["text"])}', 'expected': ''}
 
@@ -193,3 +194,16 @@ def split_list(array: List[Union[tuple, list]], separator: int = 250) -> list:
 def validate_variable(variable, var_types, var_name: str):
     if not isinstance(variable, var_types):
         raise ValueError(f'{var_name} must be {var_types}')
+
+
+def _write_feature(file_path: str, line: int, column: int, value: str) -> None:
+    def count_symbols(to_line: str, arr: list) -> int:
+        return sum((len(length.encode()) for length in arr[:to_line]))
+
+    with open(file_path, 'r+') as file:
+        lines = file.readlines()
+        symbols_count = count_symbols(line - 1, lines) + column
+        file.seek(symbols_count)
+        rem = file.read()
+        file.seek(symbols_count)
+        file.write(f'{value} {rem}')
