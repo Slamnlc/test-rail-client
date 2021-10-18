@@ -118,6 +118,8 @@ def get_feature(file_path: str):
                 for index, name in enumerate(examples_names):
                     sc['scenario']['name'] = sc['scenario']['name'].replace(f'<{name}>', example[index])
                     for step in sc['scenario']['steps']:
+                        if step.get('content', None) is None:
+                            step['content'] = step['text']
                         step['content'] = step['content'].replace(f'<{name}>', example[index])
                 examples_scenarios.append(sc)
             feature.children.remove(scenario)
