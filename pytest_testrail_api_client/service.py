@@ -90,13 +90,19 @@ def get_features(path: str, test_rail):
             scenario['scenario']['custom_fields'], scenario['scenario']['types'], scenario['scenario']['priority'] = \
                 _get_case_options(tags, custom_tags, case_types, priority_list)
 
-        suite_id = tuple(suite.id for suite in suites_list if parsed_feature.main_suite == suite.name)
-        if len(suite_id) > 0:
-            parsed_feature.main_suite = suite_id[0]
-            section_id = tuple(section.id for section in sections[parsed_feature.main_suite] if
-                               section.name == parsed_feature.last_section)
-            if len(section_id) > 0:
-                parsed_feature.last_section = section_id[0]
+        suite_id = next((suite.id for suite in suites_list if parsed_feature.main_suite == suite.name), None)
+        if suite_id is not None:
+            parsed_feature.main_suite = suite_id
+            section_id = next((section.id for section in sections[parsed_feature.main_suite] if
+                               section.name == parsed_feature.last_section), None)
+            if section_id is not None:
+                parsed_feature.last_section = section_id
+            else:
+                pass
+                # TODO: add section to testrail
+        else:
+            pass
+            # TODO: add exception about missing suite name in feature
 
         features.append(parsed_feature)
     return features

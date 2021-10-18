@@ -1,8 +1,9 @@
 TR_PREFIX = '@C'
+SECTIONS_SEPARATOR = ' - '
 
 PRIORITY_REPLACE = {
-    'Critical': ['smoke'],
+    'Critical': ['regression'],
     'High': ['sanity'],
-    'Medium': ['regression'],
+    'Medium': ['smoke'],
     'Low': []
 }
