@@ -1,6 +1,7 @@
 import os
 from copy import deepcopy
 from datetime import datetime
+from itertools import chain
 from typing import List, Union
 
 from _pytest.config import Config
@@ -10,7 +11,7 @@ from gherkin.token_scanner import TokenScanner
 
 from pytest_testrail_api_client.client_config import PRIORITY_REPLACE, VALIDATE_FEATURES
 from pytest_testrail_api_client.modules.bdd_classes import TrFeature
-from pytest_testrail_api_client.modules.exceptions import MissingSuiteInFeature
+from pytest_testrail_api_client.modules.exceptions import MissingSuiteInFeature, ValidationError
 from pytest_testrail_api_client.validate import validate_scenario_tags
 
 
@@ -81,7 +82,9 @@ def get_features(path: str, test_rail):
                               for file in files if file.split('.')[-1] == 'feature')
     feature_files = tuple(get_feature(feature_file) for feature_file in feature_files)
     if VALIDATE_FEATURES is True:
-        errors = tuple(validate_scenario_tags(feature) for feature in feature_files)
+        errors = tuple(chain.from_iterable(validate_scenario_tags(feature) for feature in feature_files))
+        if len(errors) > 0:
+            raise ValidationError('\n'.join(errors))
     features = []
     suites_list = test_rail.suites.get_suites()
     custom_tags = test_rail.case_fields._service_case_fields()
