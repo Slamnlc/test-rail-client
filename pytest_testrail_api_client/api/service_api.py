@@ -1,3 +1,4 @@
+import re
 from itertools import chain
 from typing import List
 
@@ -80,3 +81,13 @@ class ServiceApi(Base):
                             results.remove(res)
 
         self._session.results.add_results(new_run_id, to_json(results))
+
+    def delete_cases_by_regex(self, string_with_cases_ids: str) -> str:
+        """
+        Delete cases from TestRail using regEx for take id from text
+        """
+        case_ids, deleted_count = re.findall(r'\d+', string_with_cases_ids), 0
+        for case_id in case_ids:
+            if self._session.cases.delete_case(int(case_id)) == 200:
+                deleted_count += 1
+        return f'Deleted {deleted_count} of {len(case_ids)}'
