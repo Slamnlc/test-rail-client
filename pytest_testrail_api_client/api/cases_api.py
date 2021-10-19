@@ -29,7 +29,7 @@ class CasesApi(Base):
         """
         if project_id is None:
             project_id = self._session.project_id
-        params = dict()
+        params = {}
         if suite_id:
             params.update({'suite_id': suite_id})
         return self._valid(self._session.request('get', f'{self.__sub_host}/get_cases/{project_id}', params=params),
@@ -162,7 +162,7 @@ class CasesApi(Base):
         :param suite_id: The ID of the suite (Only required if project is in multi-suite mode)
         :return:
         """
-        params, data = get_dict_from_locals(locals(), exclude=['case_ids', 'project_id']), dict()
+        params, data = get_dict_from_locals(locals(), exclude=['case_ids', 'project_id']), {}
         if case_ids is not None:
             if isinstance(case_ids, str):
                 case_ids = case_ids.replace(' ', '').split(',')

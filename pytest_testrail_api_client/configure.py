@@ -3,8 +3,9 @@ import os
 
 import pytest
 from _pytest.config import Config
+
 from pytest_testrail_api_client import test_rail
-from pytest_testrail_api_client.client_config import TR_PREFIX, SECTIONS_SEPARATOR
+from pytest_testrail_api_client.client_config import TR_PREFIX, SECTIONS_SEPARATOR, MAIN_CASE_TEMPLATE_NAME
 from pytest_testrail_api_client.modules.case import Case
 from pytest_testrail_api_client.modules.classes import Suite
 from pytest_testrail_api_client.modules.exceptions import TestRailError
@@ -43,7 +44,7 @@ def pytest_collection_modifyitems(config: Config, items):
         cases_list = {suite: pytest.test_rail.cases.get_cases(suite_id=suite) for suite
                       in set(feature.main_suite for feature in features)}
         template_id = next((template.id for template in pytest.test_rail.templates.get_templates()
-                            if template.name == 'Test Case (Steps)'), None)
+                            if template.name == MAIN_CASE_TEMPLATE_NAME), None)
         total_tests, current_test = sum((len(x.children) for x in features)), 1
         for feature in features:
             for scenario in feature.children:

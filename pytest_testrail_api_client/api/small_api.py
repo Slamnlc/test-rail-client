@@ -2,12 +2,12 @@ from typing import List
 
 from pytest_testrail_api_client.client_config import REPLACE_TAGS
 from pytest_testrail_api_client.modules.case_field import CaseField
-from pytest_testrail_api_client.modules.category import Base
+import pytest_testrail_api_client.modules.category as category
 from pytest_testrail_api_client.modules.classes import Status, CaseType, Template, ResultField, Priority, TestObj
 from pytest_testrail_api_client.service import validate_id, get_dict_from_locals
 
 
-class StatusesApi(Base):
+class StatusesApi(category.Base):
     __sub_host = '/api/v2'
 
     def get_statuses(self):
@@ -20,7 +20,7 @@ class StatusesApi(Base):
         return self._valid(self._session.request('get', f'{self.__sub_host}/get_statuses'), Status)
 
 
-class TestsApi(Base):
+class TestsApi(category.Base):
     __sub_host = '/api/v2'
 
     def get_test(self, test_id: int) -> TestObj:
@@ -43,12 +43,12 @@ class TestsApi(Base):
         :return:
         """
         status_id = validate_id(status_id)
-        params = dict() if status_id is None else {'status_id': status_id}
+        params = {} if status_id is None else {'status_id': status_id}
         return self._valid(self._session.request('get', f'{self.__sub_host}/get_tests/{run_id}', params=params),
                            TestObj)
 
 
-class CaseTypesApi(Base):
+class CaseTypesApi(category.Base):
     __sub_host = '/api/v2'
 
     def get_case_types(self) -> List[CaseType]:
@@ -64,7 +64,7 @@ class CaseTypesApi(Base):
         return {case_type.name.lower(): case_type.id for case_type in self.get_case_types()}
 
 
-class TemplatesApi(Base):
+class TemplatesApi(category.Base):
     __sub_host = '/api/v2'
 
     def get_templates(self, project_id: int = None) -> List[Template]:
@@ -80,7 +80,7 @@ class TemplatesApi(Base):
         return self._valid(self._session.request('get', f'{self.__sub_host}/get_templates/{project_id}'), Template)
 
 
-class CaseFieldsApi(Base):
+class CaseFieldsApi(category.Base):
     __sub_host = '/api/v2'
 
     def get_case_fields(self) -> List[CaseField]:
@@ -114,7 +114,7 @@ class CaseFieldsApi(Base):
         return self._valid(self._session.request('post', f'{self.__sub_host}/add_case_field', data=data), CaseField)
 
     def _service_case_fields(self) -> dict:
-        serv = dict()
+        serv = {}
         serv_fields = {key.lower(): value for key, value in REPLACE_TAGS.items()}
         for field in self.get_case_fields():
             for config in field.configs:
@@ -127,7 +127,7 @@ class CaseFieldsApi(Base):
         return serv
 
 
-class ResultsFieldsApi(Base):
+class ResultsFieldsApi(category.Base):
     __sub_host = '/api/v2'
 
     def get_result_fields(self) -> List[ResultField]:
@@ -140,7 +140,7 @@ class ResultsFieldsApi(Base):
         return self._valid(self._session.request('get', f'{self.__sub_host}/get_result_fields'), ResultField)
 
 
-class PrioritiesApi(Base):
+class PrioritiesApi(category.Base):
     __sub_host = '/api/v2'
 
     def get_priorities(self) -> List[Priority]:
@@ -156,7 +156,7 @@ class PrioritiesApi(Base):
         return {priority.name.lower(): priority.id for priority in self.get_priorities()}
 
 
-class SharedStepsApi(Base):
+class SharedStepsApi(category.Base):
     __sub_host = '/api/v2'
 
     def get_shared_steps(self, project_id: int = None):
@@ -172,7 +172,7 @@ class SharedStepsApi(Base):
         return self._session.request('get', f'{self.__sub_host}/get_shared_steps/{project_id}')
 
 
-class ReportsApi(Base):
+class ReportsApi(category.Base):
     __sub_host = '/api/v2'
 
     def get_reports(self, project_id: int = None):

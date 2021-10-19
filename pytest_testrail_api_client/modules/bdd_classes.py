@@ -29,7 +29,7 @@ class TrFeature:
                     self.children.pop(0)
                 else:
                     background = None
-                self.children = list(filter(lambda scenario: 'scenario' in scenario, self.children))
+                self.children = list(filter(lambda sc: 'scenario' in sc, self.children))
                 for scenario in self.children:
                     if background is not None:
                         scenario['scenario']['steps'] = background + [service._make_step(step) for step in

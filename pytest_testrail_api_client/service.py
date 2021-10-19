@@ -152,7 +152,7 @@ def _make_step(step: dict) -> str:
 
 
 def _get_case_options(case_tags: list, tr_tags: dict, tr_case_types: dict, tr_priority: dict):
-    custom_fields, cases_type, priority = dict(), [], None
+    custom_fields, cases_type, priority = {}, [], None
     for key, value in tr_tags.items():
         if key in case_tags:
             if value['name'] in custom_fields:

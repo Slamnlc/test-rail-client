@@ -1,11 +1,11 @@
 from typing import List
 
-from pytest_testrail_api_client.modules.category import Base
+import pytest_testrail_api_client.modules.category as category
 from pytest_testrail_api_client.modules.classes import Section
 from pytest_testrail_api_client.service import get_dict_from_locals
 
 
-class SectionsApi(Base):
+class SectionsApi(category.Base):
     __sub_host = '/api/v2'
 
     def get_section(self, section_id: int) -> Section:
@@ -27,7 +27,7 @@ class SectionsApi(Base):
         :param project_id: The ID of the project - if project ID isn't indicated - take default project id
         :return:
         """
-        params = dict()
+        params = {}
         if project_id is None:
             project_id = self._session.project_id
         if suite_id is not None:

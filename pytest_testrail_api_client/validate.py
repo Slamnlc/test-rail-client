@@ -1,11 +1,10 @@
 from itertools import chain
 
-from pytest_testrail_api_client import test_rail
+import pytest_testrail_api_client.service as service
 from pytest_testrail_api_client.client_config import NO_TAG_IN_FEATURE_HEADER, ONE_OF_TAGS, AT_LEAST_ONE
 from pytest_testrail_api_client.modules.bdd_classes import TrFeature
 from pytest_testrail_api_client.modules.exceptions import TestRailError
 from pytest_testrail_api_client.modules.plan import Plan
-import pytest_testrail_api_client.service as service
 
 
 def validate_scenario_tags(feature: TrFeature):
