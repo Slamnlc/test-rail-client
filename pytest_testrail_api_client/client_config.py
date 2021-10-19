@@ -8,6 +8,11 @@ PRIORITY_REPLACE = {
     'Low': []
 }
 
+REPLACE_TAGS = {
+    'to be automated': 'to_automate',
+}
+
+
 # ------Validate features--------
 
 VALIDATE_FEATURES = True
