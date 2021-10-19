@@ -112,7 +112,7 @@ def get_features(path: str, test_rail):
             parsed_feature.last_section = parent_id
         else:
             raise MissingSuiteInFeature(f'Missing suite in {feature}')
-        features.append(parsed_feature)
+        features.append(sorted(parsed_feature.children, key=lambda scen: scen['scenario']['location']['line']))
     return features
 
 
