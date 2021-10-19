@@ -112,7 +112,8 @@ def get_features(path: str, test_rail):
             parsed_feature.last_section = parent_id
         else:
             raise MissingSuiteInFeature(f'Missing suite in {feature}')
-        features.append(sorted(parsed_feature.children, key=lambda scen: scen['scenario']['location']['line']))
+        parsed_feature.children = sorted(parsed_feature.children, key=lambda scen: scen['scenario']['location']['line'])
+        features.append(parsed_feature)
     return features
 
 
@@ -152,7 +153,7 @@ def _make_step(step: dict) -> str:
 
 
 def _get_case_options(case_tags: list, tr_tags: dict, tr_case_types: dict, tr_priority: dict):
-    custom_fields, cases_type, priority = {}, [], None
+    custom_fields, cases_type, priority = dict(), [], None
     for key, value in tr_tags.items():
         if key in case_tags:
             if value['name'] in custom_fields:
