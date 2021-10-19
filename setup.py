@@ -20,7 +20,8 @@ setup(
         'requests',
         'pytest',
         'gherkin-official>=4.1.0',
-        'pytest-bdd>=3.3.0'
+        'pytest-bdd>=3.3.0',
+        'typing'
     ],
     entry_points={
         "pytest11": [
