@@ -1,7 +1,7 @@
 from itertools import chain
 from typing import List
 
-from pytest_testrail_api_client.service import get_date_from_timestamp
+import pytest_testrail_api_client.service as service
 
 
 class Run:
@@ -15,7 +15,7 @@ class Run:
             self.assignedto_id = data.get('assignedto_id')
             self.include_all: bool = data.get('include_all')
             self.is_completed: bool = data.get('is_completed')
-            self.completed_on = get_date_from_timestamp(data.get('completed_on'))
+            self.completed_on = service.get_date_from_timestamp(data.get('completed_on'))
             self.passed_count: int = data.get('passed_count')
             self.blocked_count: int = data.get('blocked_count')
             self.untested_count: int = data.get('untested_count')
@@ -34,7 +34,7 @@ class Run:
             self.entry_id: str = data.get('entry_id')
             self.config: str = data.get('config')
             self.config_ids: list = data.get('config_ids')
-            self.created_on = get_date_from_timestamp(data.get('created_on'))
+            self.created_on = service.get_date_from_timestamp(data.get('created_on'))
             self.refs: str = data.get('refs')
             self.created_by: int = data.get('created_by')
             self.url: str = data.get('url')
@@ -67,7 +67,7 @@ class Plan:
             self.milestone_id = data.get('milestone_id')
             self.assignedto_id = data.get('assignedto_id')
             self.is_completed: bool = data.get('is_completed')
-            self.completed_on = get_date_from_timestamp(data.get('completed_on'))
+            self.completed_on = service.get_date_from_timestamp(data.get('completed_on'))
             self.passed_count: int = data.get('passed_count')
             self.blocked_count: int = data.get('blocked_count')
             self.untested_count: int = data.get('untested_count')
@@ -81,7 +81,7 @@ class Plan:
             self.custom_status6_count: int = data.get('custom_status6_count')
             self.custom_status7_count: int = data.get('custom_status7_count')
             self.project_id: int = data.get('project_id')
-            self.created_on: int = get_date_from_timestamp(data.get('created_on'))
+            self.created_on: int = service.get_date_from_timestamp(data.get('created_on'))
             self.created_by: int = data.get('created_by')
             self.url: str = data.get('url')
             if data.get('entries') is not None:
