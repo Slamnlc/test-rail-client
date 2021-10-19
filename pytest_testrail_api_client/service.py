@@ -81,7 +81,7 @@ def get_features(path: str, test_rail):
                               for file in files if file.split('.')[-1] == 'feature')
     feature_files = tuple(get_feature(feature_file) for feature_file in feature_files)
     if VALIDATE_FEATURES is True:
-        errors = tuple(validate_scenario_tags(feature, feature.path) for feature in feature_files)
+        errors = tuple(validate_scenario_tags(feature) for feature in feature_files)
     features = []
     suites_list = test_rail.suites.get_suites()
     custom_tags = test_rail.case_fields._service_case_fields()

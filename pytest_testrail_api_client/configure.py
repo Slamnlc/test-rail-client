@@ -3,7 +3,6 @@ import os
 
 import pytest
 from _pytest.config import Config
-
 from pytest_testrail_api_client import test_rail
 from pytest_testrail_api_client.client_config import TR_PREFIX, SECTIONS_SEPARATOR
 from pytest_testrail_api_client.modules.case import Case
@@ -32,16 +31,14 @@ def pytest_configure(config: Config):
         os.remove(file_name)
 
 
-def pytest_collection_modifyitems(config, items):
-    if 'pytest_testrail_export_test_results' in config.option and \
-            config.option.pytest_testrail_export_test_results is True:
+def pytest_collection_modifyitems(config: Config, items):
+    if config.getoption('pytest_testrail_export_test_results', default=None) is True:
         validate_plan_id(config.getoption('pytest_testrail_test_plan_id'), pytest.test_rail)
         validate_configs(config.getoption('pytest_testrail_test_configuration_name'), pytest.test_rail)
-    if 'pytest-testrail-export-test-cases' in config.option and \
-            config.option.pytest_testrail_export_test_cases is True:
+    if config.getoption('pytest_testrail_export_test_cases', default=None) is True:
         config.option.markexpr = 'not not_in_scope'
         print('\nUn-select all tests. Exporting is selected')
-        abs_path = os.path.join(config.rootdir, config.getoprion('pytest-testrail-feature-files-relative-path'))
+        abs_path = os.path.join(config.rootdir, config.getoption('pytest_testrail_feature_files_relative_path'))
         features = get_features(abs_path, pytest.test_rail)
         cases_list = {suite: pytest.test_rail.cases.get_cases(suite_id=suite) for suite
                       in set(feature.main_suite for feature in features)}
@@ -85,8 +82,7 @@ def pytest_collection_modifyitems(config, items):
 
 @pytest.hookimpl(tryfirst=True)
 def pytest_bdd_after_scenario(request, feature, scenario):
-    if 'pytest_testrail_export_test_results' in request.config.option and \
-            request.config.option.pytest_testrail_export_test_results is True:
+    if request.config.getoption('pytest_testrail_export_test_results', default=None) is True:
         suite_name = feature.name.split(SECTIONS_SEPARATOR, maxsplit=1)[0]
         test_name, examples = request.node.name, scenario.examples.example_params
         test_examples, steps = test_name.split('[')[-1].replace(']', ''), []
@@ -109,8 +105,7 @@ def pytest_bdd_after_scenario(request, feature, scenario):
 
 
 def pytest_sessionfinish(session):
-    if 'pytest_testrail_export_test_results' in session.config.option and \
-            session.config.option.pytest_testrail_export_test_results is True:
+    if session.config.getoption('pytest_testrail_export_test_results', default=None) is True:
         if is_main_loop(session):
             print('Start publishing results')
             error_message, suites = [], dict()
