@@ -37,7 +37,7 @@ class UsersApi(Base):
         param = {'email': email}
         return self._valid(self._session.request('get', f'{self.__sub_host}/get_user_by_email', params=param), User)
 
-    def get_users(self, project_id: int = None) -> list[User]:
+    def get_users(self, project_id: int = None) -> List[User]:
         """
         https://www.gurock.com/testrail/docs/api/reference/users#getusers
 
