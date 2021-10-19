@@ -12,6 +12,7 @@ from pytest_testrail_api_client.modules.exceptions import TestRailError
 from pytest_testrail_api_client.modules.plan import Run
 from pytest_testrail_api_client.modules.session import Session
 from pytest_testrail_api_client.service import is_main_loop, trim, replace_examples, get_features, _write_feature
+from pytest_testrail_api_client.validate import validate_plan_id, validate_configs
 
 
 def pytest_addoption(parser):
@@ -34,13 +35,13 @@ def pytest_configure(config: Config):
 def pytest_collection_modifyitems(config, items):
     if 'pytest_testrail_export_test_results' in config.option and \
             config.option.pytest_testrail_export_test_results is True:
-        1 == 1
-    x = pytest.test_rail.configs.get_configs()
+        validate_plan_id(config.getoption('pytest_testrail_test_plan_id'), pytest.test_rail)
+        validate_configs(config.getoption('pytest_testrail_test_configuration_name'), pytest.test_rail)
     if 'pytest-testrail-export-test-cases' in config.option and \
             config.option.pytest_testrail_export_test_cases is True:
         config.option.markexpr = 'not not_in_scope'
         print('\nUn-select all tests. Exporting is selected')
-        abs_path = os.path.join(config.rootdir, 'App/tests/content/features/filters_and_sorting.feature')
+        abs_path = os.path.join(config.rootdir, config.getoprion('pytest-testrail-feature-files-relative-path'))
         features = get_features(abs_path, pytest.test_rail)
         cases_list = {suite: pytest.test_rail.cases.get_cases(suite_id=suite) for suite
                       in set(feature.main_suite for feature in features)}
@@ -162,7 +163,7 @@ def add_entry_to_plan(plan_id: int, suite_id: int, name: str, config: list) -> R
         raise TestRailError(entry)
 
 
-def sort_configurations(configuration) -> str:
+def sort_configurations(configuration: str) -> str:
     config_split, config = trim(configuration).split(', '), []
     tr: test_rail.TestRail = pytest.test_rail
     for param in tr.configs.get_configs():

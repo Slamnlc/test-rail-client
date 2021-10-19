@@ -8,9 +8,10 @@ from _pytest.main import Session
 from gherkin.parser import Parser
 from gherkin.token_scanner import TokenScanner
 
-from pytest_testrail_api_client.client_config import PRIORITY_REPLACE
+from pytest_testrail_api_client.client_config import PRIORITY_REPLACE, VALIDATE_FEATURES
 from pytest_testrail_api_client.modules.bdd_classes import TrFeature
 from pytest_testrail_api_client.modules.exceptions import MissingSuiteInFeature
+from pytest_testrail_api_client.validate import validate_scenario_tags
 
 
 def get_dict_from_locals(locals_dict: dict, replace_underscore: bool = False, exclude: list = None):
@@ -78,6 +79,9 @@ def get_features(path: str, test_rail):
     else:
         feature_files = tuple(f"{root}/{file}" for root, dirs, files in os.walk(path, topdown=False)
                               for file in files if file.split('.')[-1] == 'feature')
+    feature_files = tuple(get_feature(feature_file) for feature_file in feature_files)
+    if VALIDATE_FEATURES is True:
+        errors = tuple(validate_scenario_tags(feature, feature.path) for feature in feature_files)
     features = []
     suites_list = test_rail.suites.get_suites()
     custom_tags = test_rail.case_fields._service_case_fields()
@@ -85,7 +89,7 @@ def get_features(path: str, test_rail):
     priority_list = test_rail.priorities._service_priorities()
     sections = {suite.id: test_rail.sections.get_sections(suite.id) for suite in suites_list}
     for feature in feature_files:
-        parsed_feature = get_feature(feature)
+        parsed_feature = parse_feature(feature)
         for scenario in parsed_feature.children:
             tags = list(tag['name'].lower().replace('@', '') for tag in scenario['scenario']['tags'])
             scenario['scenario']['custom_fields'], scenario['scenario']['types'], scenario['scenario']['priority'] = \
@@ -109,9 +113,7 @@ def get_features(path: str, test_rail):
     return features
 
 
-def get_feature(file_path: str):
-    with open(file_path, "r") as file:
-        feature = TrFeature(Parser().parse(TokenScanner(file.read()))['feature'], file_path)
+def parse_feature(feature):
     examples_scenarios, to_delete = [], []
     for scenario in feature.children:
         if len(scenario['scenario']['examples']) > 0:
@@ -135,6 +137,11 @@ def get_feature(file_path: str):
     for scenario in examples_scenarios:
         feature.children.append(scenario)
     return feature
+
+
+def get_feature(file_path: str) -> list:
+    with open(file_path, "r") as file:
+        return TrFeature(Parser().parse(TokenScanner(file.read()))['feature'], file_path)
 
 
 def _make_step(step: dict) -> str:

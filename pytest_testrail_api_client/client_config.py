@@ -7,3 +7,15 @@ PRIORITY_REPLACE = {
     'Medium': ['smoke'],
     'Low': []
 }
+
+# ------Validate features--------
+
+VALIDATE_FEATURES = True
+NO_TAG_IN_FEATURE_HEADER = True
+ONE_OF_TAGS = [
+    ['@to_automate', '@automated', '@manual'],
+    ['@smoke', '@critical', '@regression']
+]
+AT_LEAST_ONE = [
+    ['@phone', '@tablet']
+]
