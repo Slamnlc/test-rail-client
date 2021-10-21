@@ -149,7 +149,7 @@ def get_feature(file_path: str) -> list:
 
 
 def _make_step(step: dict) -> str:
-    return {'content': f'**{step["keyword"].replace(" ", "")}:** {trim(step["text"])}', 'expected': ''}
+    return {'content': f'**{step["keyword"].replace(" ", "")}:**{trim(step["text"])}', 'expected': ''}
 
 
 def _get_case_options(case_tags: list, tr_tags: dict, tr_case_types: dict, tr_priority: dict):
