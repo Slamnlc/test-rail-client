@@ -12,6 +12,8 @@ PRIORITY_REPLACE = {
 
 REPLACE_TAGS = {
     'to be automated': 'to_automate',
+    'productivity': 'tablet',
+    'mobile': 'phone'
 }
 
 
