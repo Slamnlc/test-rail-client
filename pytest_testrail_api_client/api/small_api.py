@@ -134,11 +134,8 @@ class CaseFieldsApi(category.Base):
                 if hasattr(config.options, 'items'):
                     for key, value in config.options.items.items():
                         name = serv_fields[key.lower()] if key.lower() in serv_fields else key.replace(' ', '_').lower()
-                        serv.update({name: {'id': value, 'name': field.system_name, 'type': self.__type_id}})
-                        if key.lower() in serv_fields:
-                            serv.update({serv_fields[key.lower()]: {'id': value, 'name': field.system_name}})
-                        else:
-                            serv.update({key.replace(' ', '_').lower(): {'id': value, 'name': field.system_name}})
+                        serv.update({name: {'id': value, 'name': field.system_name,
+                                            'type': self.__type_id[field.type_id]}})
         return serv
 
 

@@ -8,7 +8,6 @@ from _pytest.config import Config
 from _pytest.main import Session
 from gherkin.parser import Parser
 from gherkin.token_scanner import TokenScanner
-
 from pytest_testrail_api_client.client_config import PRIORITY_REPLACE, VALIDATE_FEATURES
 from pytest_testrail_api_client.modules.bdd_classes import TrFeature
 from pytest_testrail_api_client.modules.exceptions import MissingSuiteInFeature, ValidationError
@@ -156,14 +155,15 @@ def _get_case_options(case_tags: list, tr_tags: dict, tr_case_types: dict, tr_pr
     custom_fields, cases_type, priority = dict(), [], None
     for key, value in tr_tags.items():
         if key in case_tags:
-            if value['name'] in custom_fields:
-                custom_fields[value['name']].append(value['id'])
+            if value['type'] == 'multi_select':
+                if value['name'] in custom_fields:
+                    custom_fields[value['name']].append(int(value['id']))
+                else:
+                    custom_fields[value['name']] = [int(value['id'])]
+            elif value['type'] in ('integer', 'dropdown'):
+                custom_fields[value['name']] = int(value['id'])
             else:
-                custom_fields[value['name']] = [value['id']]
-            case_tags.remove(key)
-    for key, value in custom_fields.items():
-        if len(value) == 1:
-            custom_fields[key] = value[0]
+                custom_fields[value['name']] = value['id']
     for key, value in PRIORITY_REPLACE.items():
         for val in value:
             if val.lower() in case_tags:
