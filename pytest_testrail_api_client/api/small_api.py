@@ -1,8 +1,8 @@
 from typing import List
 
+import pytest_testrail_api_client.modules.category as category
 from pytest_testrail_api_client.client_config import REPLACE_TAGS
 from pytest_testrail_api_client.modules.case_field import CaseField
-import pytest_testrail_api_client.modules.category as category
 from pytest_testrail_api_client.modules.classes import Status, CaseType, Template, ResultField, Priority, TestObj
 from pytest_testrail_api_client.service import validate_id, get_dict_from_locals
 
@@ -82,6 +82,19 @@ class TemplatesApi(category.Base):
 
 class CaseFieldsApi(category.Base):
     __sub_host = '/api/v2'
+    __type_id = {
+        1: 'string',
+        2: 'integer',
+        3: 'text',
+        4: 'url',
+        5: 'checkbox',
+        6: 'dropdown',
+        7: 'user',
+        8: 'date',
+        9: 'milestone',
+        10: 'steps',
+        12: 'multi_select'
+    }
 
     def get_case_fields(self) -> List[CaseField]:
         """
@@ -120,6 +133,8 @@ class CaseFieldsApi(category.Base):
             for config in field.configs:
                 if hasattr(config.options, 'items'):
                     for key, value in config.options.items.items():
+                        name = serv_fields[key.lower()] if key.lower() in serv_fields else key.replace(' ', '_').lower()
+                        serv.update({name: {'id': value, 'name': field.system_name, 'type': self.__type_id}})
                         if key.lower() in serv_fields:
                             serv.update({serv_fields[key.lower()]: {'id': value, 'name': field.system_name}})
                         else:
