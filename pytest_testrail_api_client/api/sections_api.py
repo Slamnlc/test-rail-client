@@ -2,7 +2,7 @@ from typing import List
 
 import pytest_testrail_api_client.modules.category as category
 from pytest_testrail_api_client.modules.classes import Section
-from pytest_testrail_api_client.service import get_dict_from_locals
+import pytest_testrail_api_client.service as service
 
 
 class SectionsApi(category.Base):
@@ -51,7 +51,7 @@ class SectionsApi(category.Base):
         """
         if project_id is None:
             project_id = self._session.project_id
-        data = get_dict_from_locals(locals(), exclude=['project_id'])
+        data = service.get_dict_from_locals(locals(), exclude=['project_id'])
         return self._valid(self._session.request('post', f'{self.__sub_host}/add_section/{project_id}', data=data),
                            Section)
 
@@ -66,7 +66,7 @@ class SectionsApi(category.Base):
         :param after_id: The section ID after which the section should be put (can be null)
         :return:
         """
-        data = get_dict_from_locals(locals(), exclude=['section_id'])
+        data = service.get_dict_from_locals(locals(), exclude=['section_id'])
         return self._valid(self._session.request('post', f'{self.__sub_host}/move_section/{section_id}', data=data),
                            Section)
 
@@ -81,7 +81,7 @@ class SectionsApi(category.Base):
         :param description: The description of the section
         :return:
         """
-        data = get_dict_from_locals(locals(), exclude=['section_id'])
+        data = service.get_dict_from_locals(locals(), exclude=['section_id'])
         return self._valid(self._session.request('post', f'{self.__sub_host}/update_section/{section_id}', data=data),
                            Section)
 
