@@ -1,7 +1,6 @@
 TR_PREFIX = '@C'
 SECTIONS_SEPARATOR = ' - '
 
-
 MAIN_CASE_TEMPLATE_NAME = 'Test Case (Steps)'
 PRIORITY_REPLACE = {
     'Critical': ['regression'],
@@ -15,7 +14,6 @@ REPLACE_TAGS = {
     'productivity': 'tablet',
     'mobile': 'phone'
 }
-
 
 # ------Validate features--------
 
