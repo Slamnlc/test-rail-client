@@ -150,7 +150,6 @@ class PlansApi(Base):
         :param refs: A comma-separated list of references/requirements
         :return:
         """
-        case_ids = validate_id(case_ids)
         data = get_dict_from_locals(locals(), exclude=['run_id'])
         return self._valid(self._session.request('post', f'{self.__sub_host}/update_run_in_plan_entry/{run_id}',
                                                  data=data), Run)
