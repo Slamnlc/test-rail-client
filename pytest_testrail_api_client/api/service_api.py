@@ -1,3 +1,5 @@
+import json
+import os
 import re
 from itertools import chain
 from typing import List
@@ -5,9 +7,9 @@ from typing import List
 import pytest_testrail_api_client.configure as configure
 from pytest_testrail_api_client.modules.category import Base
 from pytest_testrail_api_client.modules.classes import Suite
-from pytest_testrail_api_client.modules.plan import Run
+from pytest_testrail_api_client.modules.plan import Run, Plan
 from pytest_testrail_api_client.modules.result import Result
-from pytest_testrail_api_client.service import to_json
+from pytest_testrail_api_client.service import to_json, trim
 
 
 class ServiceApi(Base):
@@ -91,3 +93,27 @@ class ServiceApi(Base):
             if self._session.cases.delete_case(int(case_id)) == 200:
                 deleted_count += 1
         return f'Deleted {deleted_count} of {len(case_ids)}'
+
+    def get_plan_id_by_name(self, plan_name: str) -> Plan:
+        return next(tuple(filter(lambda plan: plan.name == plan_name, self._session.plans.get_plans())), None)
+
+    def add_link_to_test_rail_in_allure(self, run_id: int, allure_results_path: str):
+        tests = [(x['id'], trim(x['title'])) for x in self._session.tests.get_tests(run_id)]
+
+        for report in filter(lambda allure: allure.split('.')[-1] == 'json', os.listdir(allure_results_path)):
+            path = os.path.join(allure_results_path, report)
+            text = json.loads(open(path, 'r').read())
+            params = re.findall(r'(<\S+>)', text['name'])
+            if params:
+                for params in text['parameters']:
+                    text['name'] = text['name'].replace(f"<{params['name']}>", params['value'])
+                text['name'] = trim(re.sub(r'\[.*]', '', text['name']))
+            result = tuple(filter(lambda x: x[1] == text['name'], tests))
+            if len(result) > 0:
+                href = '<br><a href ="{url}" target="_blank">Link to Test Rail result</a>'. \
+                    format(url=f"{self._session.result_url}/{result[0][0]}")
+                if text.get('descriptionHtml'):
+                    text['descriptionHtml'] += href
+                else:
+                    text['descriptionHtml'] = href
+                open(path, 'w').write(json.dumps(text))

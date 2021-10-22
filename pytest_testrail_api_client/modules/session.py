@@ -30,6 +30,7 @@ class Session:
         if self.__host[-1] == '/':
             self.__host = self.__host[:-1]
         self.__host = f'{self.__host}/index.php?'
+        self.result_url = f'{self.__host}/tests/view'
 
     def request(self, method: str, url: str, data: dict = None, params: dict = None,
                 return_type: str = False, **kwargs):
