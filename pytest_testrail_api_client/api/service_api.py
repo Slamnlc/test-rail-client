@@ -98,7 +98,7 @@ class ServiceApi(Base):
         return next(tuple(filter(lambda plan: plan.name == plan_name, self._session.plans.get_plans())), None)
 
     def add_link_to_test_rail_in_allure(self, run_id: int, allure_results_path: str):
-        tests = [(x['id'], trim(x['title'])) for x in self._session.tests.get_tests(run_id)]
+        tests = [(x.id, trim(x.title)) for x in self._session.tests.get_tests(run_id)]
 
         for report in filter(lambda allure: allure.split('.')[-1] == 'json', os.listdir(allure_results_path)):
             path = os.path.join(allure_results_path, report)
@@ -124,5 +124,5 @@ class ServiceApi(Base):
         for entry in plan.entries:
             for run in entry.runs:
                 if run.name == suite_name and run.config == configuration:
-                    return run['id']
+                    return run.id
         raise Exception(f"Can't find run by config {config} in plan {plan_id}")
