@@ -117,3 +117,11 @@ class ServiceApi(Base):
                 else:
                     text['descriptionHtml'] = href
                 open(path, 'w').write(json.dumps(text))
+
+    def get_run_by_config(self, plan_id: int, config: str, suite_name: int):
+        plan = self._session.plans.get_plan(plan_id)
+        for entry in plan.entries:
+            for run in entry.runs:
+                if run.name == suite_name and run['config'] == config:
+                    return run['id']
+        raise Exception(f"Can't find run by config {config} in plan {plan_id}")
