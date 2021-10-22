@@ -9,7 +9,7 @@ from pytest_testrail_api_client.modules.category import Base
 from pytest_testrail_api_client.modules.classes import Suite
 from pytest_testrail_api_client.modules.plan import Run, Plan
 from pytest_testrail_api_client.modules.result import Result
-from pytest_testrail_api_client.service import to_json, trim
+from pytest_testrail_api_client.service import to_json, trim, sort_configurations
 
 
 class ServiceApi(Base):
@@ -119,9 +119,10 @@ class ServiceApi(Base):
                 open(path, 'w').write(json.dumps(text))
 
     def get_run_by_config(self, plan_id: int, config: str, suite_name: int):
+        configuration = sort_configurations(config, self._session)
         plan = self._session.plans.get_plan(plan_id)
         for entry in plan.entries:
             for run in entry.runs:
-                if run.name == suite_name and run['config'] == config:
+                if run.name == suite_name and run.config == configuration:
                     return run['id']
         raise Exception(f"Can't find run by config {config} in plan {plan_id}")

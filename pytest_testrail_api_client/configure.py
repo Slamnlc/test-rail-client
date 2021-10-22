@@ -11,7 +11,8 @@ from pytest_testrail_api_client.modules.classes import Suite
 from pytest_testrail_api_client.modules.exceptions import TestRailError
 from pytest_testrail_api_client.modules.plan import Run
 from pytest_testrail_api_client.modules.session import Session
-from pytest_testrail_api_client.service import is_main_loop, trim, replace_examples, get_features, _write_feature
+from pytest_testrail_api_client.service import is_main_loop, trim, replace_examples, get_features, _write_feature, \
+    sort_configurations
 from pytest_testrail_api_client.validate import validate_plan_id, validate_configs
 
 
@@ -120,7 +121,7 @@ def pytest_sessionfinish(session):
                             suites.update({key: value})
                 os.remove(result_file)
             plan_id = session.config.option.pytest_testrail_test_plan_id
-            config = sort_configurations(session.config.option.pytest_testrail_test_configuration_name)
+            config = sort_configurations(session.config.option.pytest_testrail_test_configuration_name, tr)
             plan, suites_list = tr.plans.get_plan(plan_id), tr.suites.get_suites()
             results = []
             for suite, results_list in suites.items():
@@ -157,16 +158,6 @@ def add_entry_to_plan(plan_id: int, suite_id: int, name: str, config: list) -> R
         return entry.runs[0]
     else:
         raise TestRailError(entry)
-
-
-def sort_configurations(configuration: str) -> str:
-    config_split, config = trim(configuration).split(', '), []
-    tr: test_rail.TestRail = pytest.test_rail
-    for param in tr.configs.get_configs():
-        for suite in config_split:
-            if suite.lower() in [conf.name.lower() for conf in param.configs]:
-                config.append(suite)
-    return ', '.join(config)
 
 
 def get_status_number(status):

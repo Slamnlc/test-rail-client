@@ -8,6 +8,8 @@ from _pytest.config import Config
 from _pytest.main import Session
 from gherkin.parser import Parser
 from gherkin.token_scanner import TokenScanner
+
+from pytest_testrail_api_client import test_rail
 from pytest_testrail_api_client.client_config import PRIORITY_REPLACE, VALIDATE_FEATURES
 from pytest_testrail_api_client.modules.bdd_classes import TrFeature
 from pytest_testrail_api_client.modules.exceptions import MissingSuiteInFeature, ValidationError
@@ -229,3 +231,12 @@ def _write_feature(file_path: str, line: int, column: int, value: str) -> None:
         rem = file.read()
         file.seek(symbols_count)
         file.write(f'{value} {rem}')
+
+
+def sort_configurations(configuration: str, tr: test_rail.TestRail) -> str:
+    config_split, config = trim(configuration).split(', '), []
+    for param in tr.configs.get_configs():
+        for suite in config_split:
+            if suite.lower() in [conf.name.lower() for conf in param.configs]:
+                config.append(suite)
+    return ', '.join(config)
