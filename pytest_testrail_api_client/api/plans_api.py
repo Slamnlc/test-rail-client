@@ -67,8 +67,6 @@ class PlansApi(Base):
         :param runs: An array of test runs with configurations, please see the example below for details
         :return:
         """
-        case_ids = validate_id(case_ids)
-        config_ids = validate_id(config_ids)
         data = get_dict_from_locals(locals(), exclude=['plan_id'])
         return self._valid(self._session.request('post', f'{self.__sub_host}/add_plan_entry/{plan_id}', data=data),
                            Entries)
@@ -90,8 +88,6 @@ class PlansApi(Base):
         :param refs: A comma-separated list of references/requirements
         :return:
         """
-        case_ids = validate_id(case_ids)
-        config_ids = validate_id(config_ids)
         data = get_dict_from_locals(locals(), exclude=['plan_id', 'entry_id'])
         return self._valid(
             self._session.request('post', f'{self.__sub_host}/add_run_to_plan_entry/{plan_id}/{entry_id}',
