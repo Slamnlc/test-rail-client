@@ -5,6 +5,7 @@ from itertools import chain
 from typing import List
 
 import pytest_testrail_api_client.configure as configure
+from pytest_testrail_api_client.client_config import TR_PREFIX
 from pytest_testrail_api_client.modules.category import Base
 from pytest_testrail_api_client.modules.classes import Suite
 from pytest_testrail_api_client.modules.plan import Run, Plan
@@ -126,3 +127,25 @@ class ServiceApi(Base):
                 if run.name == suite_name and run.config == configuration:
                     return run.id
         raise Exception(f"Can't find run by config {config} in plan {plan_id}")
+
+    def _delete_extra_cases_from_test_rail(self, features_path: str, return_cases: bool, suite_name: str):
+        """
+        Deleting from Test Rail App cases, that doesn't find in features
+        """
+        feature_files = self.get_all_feature_file(features_path)
+        features_tags = tuple(chain.from_iterable((re.findall(fr'{TR_PREFIX}\d+', open(feature, 'r').read())
+                                                   for feature in feature_files)))
+        feature_ids = [int(y.replace(TR_PREFIX, '')) for y in features_tags]
+        suiteid = tuple(filter(lambda suite: suite.name == suite_name, self._session.suites.get_suites()))[0]['id']
+        cases = self._session.cases.get_cases(suite_id=suiteid)
+        cases_ids = [int(y.id) for y in cases]
+        if return_cases:
+            return list(filter(lambda y: y.id not in feature_ids, cases))
+        extra_id = list(filter(lambda y: y not in feature_ids, cases_ids))
+        with open('extra_tests.txt', 'w') as file:
+            file.write('\n'.join([x for x in extra_id]))
+
+    @staticmethod
+    def get_all_feature_file(features_path):
+        return [f"{root}/{file}" for root, dirs, files in os.walk(features_path, topdown=False)
+                for file in files if file.split('.')[-1] == 'feature']
