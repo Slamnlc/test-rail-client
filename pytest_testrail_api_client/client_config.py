@@ -3,7 +3,8 @@ SECTIONS_SEPARATOR = ' - '
 MAIN_CASE_TEMPLATE_NAME = 'Test Case (Steps)'
 
 SKIP_FIELDS = [
-    'custom_ui_type'
+    'custom_ui_type',
+    'custom_platform'
 ]
 PRIORITY_REPLACE = {
     'Critical': ['regression'],

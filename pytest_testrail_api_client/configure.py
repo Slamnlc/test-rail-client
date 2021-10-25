@@ -3,7 +3,6 @@ import os
 
 import pytest
 from _pytest.config import Config
-
 from pytest_testrail_api_client import test_rail
 from pytest_testrail_api_client.client_config import TR_PREFIX, SECTIONS_SEPARATOR, MAIN_CASE_TEMPLATE_NAME, SKIP_FIELDS
 from pytest_testrail_api_client.modules.case import Case
@@ -72,14 +71,21 @@ def pytest_collection_modifyitems(config: Config, items):
                     if current_scenario.is_equal(tr_case):
                         print(f'Can\'t find any changes in {txt}')
                     else:
-                        print(f'Updating {txt}')
                         case.update({'case_id': tr_case.id})
-                        pytest.test_rail.cases.update_case(**case)
+                        case = pytest.test_rail.cases.update_case(**case)
+                        if isinstance(case, str):
+                            print(f'{txt}. Error {case}')
+                        else:
+                            print(f'Updated {txt}')
                 else:
-                    print(f'Upload new {txt}')
                     new_case = pytest.test_rail.cases.add_case(**case)
-                    location = sc['tags'][0]['location']
-                    _write_feature(feature.path, location['line'], location['column'] - 1, TR_PREFIX + str(new_case.id))
+                    if isinstance(new_case, str):
+                        print(f'{txt}. Error {new_case}')
+                    else:
+                        print(f'Upload new {txt}')
+                        location = sc['tags'][0]['location']
+                        _write_feature(feature.path, location['line'], location['column'] - 1,
+                                       TR_PREFIX + str(new_case.id))
                 current_test += 1
         for item in items:
             item.add_marker(pytest.mark.not_in_scope)
