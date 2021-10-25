@@ -5,7 +5,7 @@ import pytest
 from _pytest.config import Config
 
 from pytest_testrail_api_client import test_rail
-from pytest_testrail_api_client.client_config import TR_PREFIX, SECTIONS_SEPARATOR, MAIN_CASE_TEMPLATE_NAME
+from pytest_testrail_api_client.client_config import TR_PREFIX, SECTIONS_SEPARATOR, MAIN_CASE_TEMPLATE_NAME, SKIP_FIELDS
 from pytest_testrail_api_client.modules.case import Case
 from pytest_testrail_api_client.modules.classes import Suite
 from pytest_testrail_api_client.modules.exceptions import TestRailError
@@ -62,6 +62,9 @@ def pytest_collection_modifyitems(config: Config, items):
                     case.update({'priority_id': sc['priority']})
                 if 'types' in sc:
                     case.update({'type_id': sc['types'][0]})
+                for field in SKIP_FIELDS:
+                    if field in case:
+                        case.pop(field)
                 tr_case = next(filter(lambda x: trim(x.title) == sc['name'], cases_list[feature.main_suite]), None)
                 current_scenario = Case(case)
                 txt = f'scenario {current_scenario.title} in feature {feature.path}. {current_test} of {total_tests}'
