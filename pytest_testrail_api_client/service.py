@@ -173,7 +173,7 @@ def _get_case_options(case_tags: list, tr_tags: dict, tr_case_types: dict, tr_pr
     if priority is None:
         priority = tr_priority['low']
     for key, value in tr_case_types.items():
-        if key in case_tags:
+        if key in case_tags and key not in tr_tags:
             cases_type.append(value), case_tags.remove(key)
 
     return custom_fields, cases_type, priority

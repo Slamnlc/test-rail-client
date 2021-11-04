@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='pytest-testrail-api-client',
-    version='0.3.2',
+    version='0.3.3',
     use_scm_version=False,
     description='TestRail Api Python Client',
     long_description=long_description,
@@ -14,7 +14,7 @@ setup(
     author='Biriukov Maksym',
     author_email='maximbirukov77@gmail.com',
     url="https://github.com/Slamnlc/test-rail-client",
-    download_url='https://github.com/Slamnlc/test-rail-client/archive/refs/tags/v0.3.2.tar.gz',
+    download_url='https://github.com/Slamnlc/test-rail-client/archive/refs/tags/v0.3.3.tar.gz',
     packages=setuptools.find_packages(exclude=("tests", "dev_tools")),
     install_requires=[
         'requests',
