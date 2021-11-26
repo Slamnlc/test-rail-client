@@ -34,3 +34,6 @@ class TrFeature:
                     if background is not None:
                         scenario['scenario']['steps'] = background + [service._make_step(step) for step in
                                                                       scenario['scenario']['steps']]
+                    else:
+                        scenario['scenario']['steps'] = [service._make_step(step) for step in
+                                                         scenario['scenario']['steps']]

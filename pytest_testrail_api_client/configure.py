@@ -73,6 +73,10 @@ def pytest_collection_modifyitems(config: Config, items):
                     else:
                         case.update({'case_id': tr_case.id})
                         case = pytest.test_rail.cases.update_case(**case)
+                        if not any((tag['name'].startswith(TR_PREFIX) for tag in sc['tags'])):
+                            location = sc['tags'][0]['location']
+                            _write_feature(feature.path, location['line'], location['column'] - 1,
+                                           TR_PREFIX + str(case.id))
                         if isinstance(case, str):
                             print(f'{txt}. Error {case}')
                         else:
