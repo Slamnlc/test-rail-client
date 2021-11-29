@@ -67,23 +67,32 @@ class ServiceApi(Base):
             old_tests = self._session.tests.get_tests(old_run_id)
 
         new_tests = self._session.tests.get_tests(new_run_id)
-        for old_test in old_tests:
-            old_results = tuple(filter(lambda x: x.test_id == old_test.id, results))
-            if len(old_results) > 0:
-                new_test = next((x for x in new_tests if x.title == old_test.title), None)
-                if new_test is not None:
+        result_to_delete = []
+        for result in results:
+            delete_result = False
+            test_in_old_tests = next(filter(lambda x: x.id == result.test_id, old_tests), None)
+            if test_in_old_tests is not None:
+                test_in_new_tests = next(filter(lambda x: x.case_id == test_in_old_tests.case_id, new_tests), None)
+                if test_in_new_tests is not None:
                     if overwrite_results is not None:
-                        copy_results = True if new_test.status_id in overwrite_results else False
+                        copy_results = True if test_in_new_tests.status_id in overwrite_results else False
                     else:
                         copy_results = True
-                    if copy_results:
-                        for res in old_results:
-                            res.test_id = new_test.id
+                    if copy_results is True:
+                        result.test_id = test_in_new_tests.id
                     else:
-                        for res in old_results:
-                            results.remove(res)
+                        delete_result = True
+                else:
+                    delete_result = True
+            else:
+                delete_result = True
+            if delete_result:
+                result_to_delete.append(result)
 
-        self._session.results.add_results(new_run_id, to_json(results))
+        for result in result_to_delete:
+            results.remove(result)
+
+        return self._session.results.add_results(new_run_id, to_json(results))
 
     def delete_cases_by_regex(self, string_with_cases_ids: str) -> str:
         """
