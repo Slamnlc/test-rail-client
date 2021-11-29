@@ -9,7 +9,7 @@ from _pytest.main import Session
 from gherkin.parser import Parser
 from gherkin.token_scanner import TokenScanner
 
-from pytest_testrail_api_client.client_config import PRIORITY_REPLACE, VALIDATE_FEATURES
+from pytest_testrail_api_client.client_config import PRIORITY_REPLACE, VALIDATE_FEATURES, BUG_PREFIX
 from pytest_testrail_api_client.modules.bdd_classes import TrFeature
 from pytest_testrail_api_client.modules.exceptions import MissingSuiteInFeature, ValidationError
 from pytest_testrail_api_client.validate import validate_scenario_tags
@@ -97,6 +97,12 @@ def get_features(path: str, test_rail):
             tags = list(tag['name'].lower().replace('@', '') for tag in scenario['scenario']['tags'])
             scenario['scenario']['custom_fields'], scenario['scenario']['types'], scenario['scenario']['priority'] = \
                 _get_case_options(tags, custom_tags, case_types, priority_list)
+            bugs = tuple(tag['name'].replace('@', '') for tag in scenario['scenario']['tags']
+                         if tag['name'].replace('@', '').startswith(BUG_PREFIX))
+            if len(bugs) > 0:
+                scenario['scenario']['refs'] = ','.join(bugs)
+            else:
+                scenario['scenario']['refs'] = ''
 
         suite_id = next((suite.id for suite in suites_list if parsed_feature.main_suite == suite.name), None)
         if suite_id is not None:

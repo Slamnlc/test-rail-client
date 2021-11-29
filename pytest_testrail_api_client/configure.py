@@ -55,6 +55,7 @@ def pytest_collection_modifyitems(config: Config, items):
                     'custom_steps_separated': sc['steps'],
                     'estimate': '5m',
                     'template_id': template_id,
+                    'refs': sc['refs'],
                     **sc['custom_fields']
                 }
                 if 'priority' in sc:
