@@ -5,7 +5,6 @@ from itertools import chain
 from typing import List
 
 import pytest_testrail_api_client.configure as configure
-from pytest_testrail_api_client.client_config import TR_PREFIX
 from pytest_testrail_api_client.modules.category import Base
 from pytest_testrail_api_client.modules.classes import Suite
 from pytest_testrail_api_client.modules.plan import Run, Plan
@@ -142,9 +141,10 @@ class ServiceApi(Base):
         Deleting from Test Rail App cases, that doesn't find in features
         """
         feature_files = self.get_all_feature_file(features_path)
-        features_tags = tuple(chain.from_iterable((re.findall(fr'{TR_PREFIX}\d+', open(feature, 'r').read())
+        features_tags = tuple(chain.from_iterable((re.findall(fr'{self._session.configuration.tr_prefix}\d+',
+                                                              open(feature, 'r').read())
                                                    for feature in feature_files)))
-        feature_ids = [int(y.replace(TR_PREFIX, '')) for y in features_tags]
+        feature_ids = [int(y.replace(self._session.configuration.tr_prefix, '')) for y in features_tags]
         suiteid = tuple(filter(lambda suite: suite.name == suite_name, self._session.suites.get_suites()))[0]['id']
         cases = self._session.cases.get_cases(suite_id=suiteid)
         cases_ids = [int(y.id) for y in cases]

@@ -1,9 +1,8 @@
 import pytest_testrail_api_client.service as service
-from pytest_testrail_api_client.client_config import SECTIONS_SEPARATOR
 
 
 class TrFeature:
-    def __init__(self, data: dict, path: str):
+    def __init__(self, data: dict, path: str, test_rail):
         if data is not None:
             self.path = path
             self.tags: list = data.get('tags')
@@ -20,7 +19,7 @@ class TrFeature:
             self.main_suite, self.sections = None, None
             self.background, self.last_section = None, None
             if self.name is not None:
-                name = self.name.split(SECTIONS_SEPARATOR)
+                name = self.name.split(test_rail.configuration.sections_separator)
                 self.main_suite, self.sections = name[0], name[1:]
             if self.children is not None:
                 background = tuple(filter(lambda x: 'background' in x, self.children))

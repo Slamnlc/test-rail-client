@@ -1,7 +1,6 @@
 from typing import List
 
 import pytest_testrail_api_client.modules.category as category
-from pytest_testrail_api_client.client_config import REPLACE_TAGS
 from pytest_testrail_api_client.modules.case_field import CaseField
 from pytest_testrail_api_client.modules.classes import Status, CaseType, Template, ResultField, Priority, TestObj
 from pytest_testrail_api_client.service import validate_id, get_dict_from_locals
@@ -128,7 +127,7 @@ class CaseFieldsApi(category.Base):
 
     def _service_case_fields(self) -> dict:
         serv = {}
-        serv_fields = {key.lower(): value for key, value in REPLACE_TAGS.items()}
+        serv_fields = {key.lower(): value for key, value in self._session.configuration.replace_tags.items()}
         for field in self.get_case_fields():
             for config in field.configs:
                 if hasattr(config.options, 'items'):

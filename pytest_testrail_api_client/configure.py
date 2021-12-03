@@ -4,7 +4,6 @@ import os
 import pytest
 from _pytest.config import Config
 from pytest_testrail_api_client import test_rail
-from pytest_testrail_api_client.client_config import TR_PREFIX, SECTIONS_SEPARATOR, MAIN_CASE_TEMPLATE_NAME, SKIP_FIELDS
 from pytest_testrail_api_client.modules.case import Case
 from pytest_testrail_api_client.modules.classes import Suite
 from pytest_testrail_api_client.modules.exceptions import TestRailError
@@ -44,7 +43,7 @@ def pytest_collection_modifyitems(config: Config, items):
         cases_list = {suite: pytest.test_rail.cases.get_cases(suite_id=suite) for suite
                       in set(feature.main_suite for feature in features)}
         template_id = next((template.id for template in pytest.test_rail.templates.get_templates()
-                            if template.name == MAIN_CASE_TEMPLATE_NAME), None)
+                            if template.name == pytest.test_rail.configuration.main_case_template_name), None)
         total_tests, current_test = sum((len(x.children) for x in features)), 1
         for feature in features:
             for scenario in feature.children:
@@ -62,7 +61,7 @@ def pytest_collection_modifyitems(config: Config, items):
                     case.update({'priority_id': sc['priority']})
                 if 'types' in sc:
                     case.update({'type_id': sc['types'][0]})
-                for field in SKIP_FIELDS:
+                for field in pytest.test_rail.configuration.skip_fields:
                     if field in case:
                         case.pop(field)
                 tr_case = next(filter(lambda x: trim(x.title) == sc['name'], cases_list[feature.main_suite]), None)
@@ -74,10 +73,11 @@ def pytest_collection_modifyitems(config: Config, items):
                     else:
                         case.update({'case_id': tr_case.id})
                         case = pytest.test_rail.cases.update_case(**case)
-                        if not any((tag['name'].startswith(TR_PREFIX) for tag in sc['tags'])):
+                        if not any((tag['name'].startswith(pytest.test_rail.configuration.tr_prefix) for tag
+                                    in sc['tags'])):
                             location = sc['tags'][0]['location']
                             _write_feature(feature.path, location['line'], location['column'] - 1,
-                                           TR_PREFIX + str(case.id))
+                                           pytest.test_rail.configuration.tr_prefix + str(case.id))
                         if isinstance(case, str):
                             print(f'{txt}. Error {case}')
                         else:
@@ -90,7 +90,7 @@ def pytest_collection_modifyitems(config: Config, items):
                         print(f'Upload new {txt}')
                         location = sc['tags'][0]['location']
                         _write_feature(feature.path, location['line'], location['column'] - 1,
-                                       TR_PREFIX + str(new_case.id))
+                                       pytest.test_rail.configuration.tr_prefix + str(new_case.id))
                 current_test += 1
         for item in items:
             item.add_marker(pytest.mark.not_in_scope)
@@ -99,7 +99,7 @@ def pytest_collection_modifyitems(config: Config, items):
 @pytest.hookimpl(tryfirst=True)
 def pytest_bdd_after_scenario(request, feature, scenario):
     if request.config.getoption('pytest_testrail_export_test_results', default=None) is True:
-        suite_name = feature.name.split(SECTIONS_SEPARATOR, maxsplit=1)[0]
+        suite_name = feature.name.split(pytest.test_rail.configuration.sections_separator, maxsplit=1)[0]
         test_name, examples = request.node.name, scenario.examples.example_params
         test_examples, steps = test_name.split('[')[-1].replace(']', ''), []
         main_name = replace_examples(scenario.name, examples, test_examples, scenario.examples.examples)

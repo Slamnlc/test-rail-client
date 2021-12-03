@@ -9,7 +9,6 @@ from _pytest.main import Session
 from gherkin.parser import Parser
 from gherkin.token_scanner import TokenScanner
 
-from pytest_testrail_api_client.client_config import PRIORITY_REPLACE, VALIDATE_FEATURES, BUG_PREFIX
 from pytest_testrail_api_client.modules.bdd_classes import TrFeature
 from pytest_testrail_api_client.modules.exceptions import MissingSuiteInFeature, ValidationError
 from pytest_testrail_api_client.validate import validate_scenario_tags
@@ -80,9 +79,9 @@ def get_features(path: str, test_rail):
     else:
         feature_files = tuple(f"{root}/{file}" for root, dirs, files in os.walk(path, topdown=False)
                               for file in files if file.split('.')[-1] == 'feature')
-    feature_files = tuple(get_feature(feature_file) for feature_file in feature_files)
-    if VALIDATE_FEATURES is True:
-        errors = tuple(chain.from_iterable(validate_scenario_tags(feature) for feature in feature_files))
+    feature_files = tuple(get_feature(feature_file, test_rail) for feature_file in feature_files)
+    if test_rail.configuration.validate_features is True:
+        errors = tuple(chain.from_iterable(validate_scenario_tags(feature, test_rail) for feature in feature_files))
         if len(errors) > 0:
             raise ValidationError('\n'.join(errors))
     features = []
@@ -96,9 +95,9 @@ def get_features(path: str, test_rail):
         for scenario in parsed_feature.children:
             tags = list(tag['name'].lower().replace('@', '') for tag in scenario['scenario']['tags'])
             scenario['scenario']['custom_fields'], scenario['scenario']['types'], scenario['scenario']['priority'] = \
-                _get_case_options(tags, custom_tags, case_types, priority_list)
+                _get_case_options(tags, custom_tags, case_types, priority_list, test_rail)
             bugs = tuple(tag['name'].replace('@', '') for tag in scenario['scenario']['tags']
-                         if tag['name'].replace('@', '').startswith(BUG_PREFIX))
+                         if tag['name'].replace('@', '').startswith(test_rail.configuration.bug_prefix))
             if len(bugs) > 0:
                 scenario['scenario']['refs'] = ','.join(bugs)
             else:
@@ -149,16 +148,16 @@ def parse_feature(feature):
     return feature
 
 
-def get_feature(file_path: str) -> list:
+def get_feature(file_path: str, test_rail) -> list:
     with open(file_path, "r") as file:
-        return TrFeature(Parser().parse(TokenScanner(file.read()))['feature'], file_path)
+        return TrFeature(Parser().parse(TokenScanner(file.read()))['feature'], file_path, test_rail)
 
 
 def _make_step(step: dict) -> str:
     return {'content': f'**{step["keyword"].replace(" ", "")}:**{trim(step["text"])}', 'expected': ''}
 
 
-def _get_case_options(case_tags: list, tr_tags: dict, tr_case_types: dict, tr_priority: dict):
+def _get_case_options(case_tags: list, tr_tags: dict, tr_case_types: dict, tr_priority: dict, test_rail):
     custom_fields, cases_type, priority = dict(), [], None
     for key, value in tr_tags.items():
         if key in case_tags:
@@ -171,7 +170,7 @@ def _get_case_options(case_tags: list, tr_tags: dict, tr_case_types: dict, tr_pr
                 custom_fields[value['name']] = int(value['id'])
             else:
                 custom_fields[value['name']] = value['id']
-    for key, value in PRIORITY_REPLACE.items():
+    for key, value in test_rail.configuration.priority_replace.items():
         for val in value:
             if val.lower() in case_tags:
                 priority = tr_priority[key.lower()]

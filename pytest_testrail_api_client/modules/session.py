@@ -1,3 +1,4 @@
+import ast
 import base64
 import configparser
 import json
@@ -6,6 +7,7 @@ from itertools import chain
 
 import requests
 
+from pytest_testrail_api_client.modules.exceptions import TestRailError
 from pytest_testrail_api_client.service import get_worker_id
 
 
@@ -31,6 +33,7 @@ class Session:
             self.__host = self.__host[:-1]
         self.__host = f'{self.__host}/index.php?'
         self.result_url = f'{self.__host}/tests/view'
+        self.configuration = Configuration(self.__get_ini_file())
 
     def request(self, method: str, url: str, data: dict = None, params: dict = None,
                 return_type: str = False, **kwargs):
@@ -87,23 +90,30 @@ class Session:
                 #     tuple(map(os.environ.pop, ('TESTRAIL_EMAIL', 'TESTRAIL_KEY', 'TESTRAIL_URL')))
                 return
 
-            path, config = os.path.dirname(__file__), configparser.ConfigParser()
-            for _ in range(9):
-                for file in ('pytest', 'test_rail'):
-                    file_name = os.path.join(path, f'{file}.ini')
-                    if os.path.isfile(file_name):
-                        config.read(file_name)
-                        if config.has_section('pytest'):
-                            options = config.options('pytest')
-                            if all((option in options for option in
-                                    ('testrail-email', 'testrail-key', 'testrail-url'))):
-                                test_rail = config['pytest']
-                                self._session.auth = Auth(test_rail['testrail-email'], test_rail['testrail-key'])
-                                self.__host = test_rail['testrail-url']
-                                return
-                path = os.path.dirname(path)
+            config = configparser.ConfigParser()
+            file_name = self.__get_ini_file()
+            if file_name is not None:
+                config.read(file_name)
+                if config.has_section('pytest'):
+                    options = config.options('pytest')
+                    if all((option in options for option in
+                            ('testrail-email', 'testrail-key', 'testrail-url'))):
+                        test_rail = config['pytest']
+                        self._session.auth = Auth(test_rail['testrail-email'], test_rail['testrail-key'])
+                        self.__host = test_rail['testrail-url']
+                        return
         self.__host = '/'
         self._session.auth = Auth('', '')
+
+    @staticmethod
+    def __get_ini_file():
+        path = os.path.dirname(__file__)
+        for _ in range(9):
+            for file in ('pytest', 'test_rail'):
+                file_name = os.path.join(path, f'{file}.ini')
+                if os.path.isfile(file_name):
+                    return file_name
+            path = os.path.dirname(path)
 
     @staticmethod
     def get_results_file(session):
@@ -127,3 +137,45 @@ class Auth:
 
     def __del__(self):
         return 'BasicAuth'
+
+
+class Configuration:
+    def __init__(self, ini_file_path: str):
+        self.tr_prefix = self.bug_prefix = self.sections_separator = self.main_case_template_name = ''
+        self.validate_features = self.no_tag_in_feature_header = None
+        self.skip_fields = self.one_of_tags = self.at_least_one = []
+        self.priority_replace = self.replace_tags = {}
+
+        if ini_file_path is not None:
+            config = configparser.ConfigParser()
+            config.read(ini_file_path)
+            if config.has_section('pytest'):
+                section = config['pytest']
+                attributes = ('tr_prefix', 'bug_prefix', 'sections_separator', 'main_case_template_name', 'skip_fields',
+                              'priority_replace', 'replace_tags', 'validate_features', 'no_tag_in_feature_header',
+                              'one_of_tags', 'at_least_one')
+                for attribute in attributes:
+                    if section.get(attribute) is not None:
+                        self.__setattr__(attribute, ast.literal_eval(section.get(attribute)))
+            err_txt = []
+            for attribute in ('tr_prefix', 'bug_prefix', 'sections_separator', 'main_case_template_name'):
+                val = self.__getattribute__(attribute)
+                if val == '' or not isinstance(val, str):
+                    err_txt.append(f'Parameter "{attribute}" must be non-empty string')
+            for attribute in ('skip_fields', 'one_of_tags', 'at_least_one'):
+                if not isinstance(self.__getattribute__(attribute), (list, str)):
+                    err_txt.append(f'Parameter "{attribute}" must be list or tuple')
+            for attribute in ('priority_replace', 'replace_tags'):
+                if not isinstance(self.__getattribute__(attribute), dict):
+                    err_txt.append(f'Parameter "{attribute}" must be dict')
+            for attribute in ('validate_features', 'no_tag_in_feature_header'):
+                val = self.__getattribute__(attribute)
+                if val is not None:
+                    if not isinstance(val, bool):
+                        err_txt.append(f'Parameter "{attribute}" must be boolean')
+
+            if len(err_txt) > 0:
+                raise TestRailError('\n'.join(err_txt))
+
+        else:
+            raise TestRailError('Missing ini file')
