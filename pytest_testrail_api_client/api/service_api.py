@@ -109,24 +109,23 @@ class ServiceApi(Base):
     def add_link_to_test_rail_in_allure(self, run_id: int, allure_results_path: str):
         tests = [(x.id, trim(x.title)) for x in self._session.tests.get_tests(run_id)]
 
-        for report in filter(lambda allure: allure.split('.')[-1] == 'json', os.listdir(allure_results_path)):
+        for report in filter(lambda allure: '-result.json' in allure, os.listdir(allure_results_path)):
             path = os.path.join(allure_results_path, report)
-            if 'categories.json' not in path:
-                text = json.loads(open(path, 'r').read())
-                params = re.findall(r'(<\S+>)', text['name'])
-                if params:
-                    for params in text['parameters']:
-                        text['name'] = text['name'].replace(f"<{params['name']}>", params['value'])
-                    text['name'] = trim(re.sub(r'\[.*]', '', text['name']))
-                result = tuple(filter(lambda x: x[1] == text['name'], tests))
-                if len(result) > 0:
-                    href = '<br><a href ="{url}" target="_blank">Link to Test Rail result</a>'. \
-                        format(url=f"{self._session.result_url}/{result[0][0]}")
-                    if text.get('descriptionHtml'):
-                        text['descriptionHtml'] += href
-                    else:
-                        text['descriptionHtml'] = href
-                    open(path, 'w').write(json.dumps(text))
+            text = json.loads(open(path, 'r').read())
+            params = re.findall(r'(<\S+>)', text['name'])
+            if params:
+                for params in text['parameters']:
+                    text['name'] = text['name'].replace(f"<{params['name']}>", params['value'])
+                text['name'] = trim(re.sub(r'\[.*]', '', text['name']))
+            result = tuple(filter(lambda x: x[1] == text['name'], tests))
+            if len(result) > 0:
+                href = '<br><a href ="{url}" target="_blank">Link to Test Rail result</a>'. \
+                    format(url=f"{self._session.result_url}/{result[0][0]}")
+                if text.get('descriptionHtml'):
+                    text['descriptionHtml'] += href
+                else:
+                    text['descriptionHtml'] = href
+                open(path, 'w').write(json.dumps(text))
 
     def get_run_by_config(self, plan_id: int, config: str, suite_name: int):
         configuration = sort_configurations(config, self._session)
